@@ -1,9 +1,10 @@
-package com.rakuten.assignment
+package com.rakuten.assignment.activity.main
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import com.rakuten.assignment.R
+import com.rakuten.assignment.activity.BaseActivity
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
