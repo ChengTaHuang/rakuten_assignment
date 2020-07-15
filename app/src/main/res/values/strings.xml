@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">rakuten-assignment</string>
+    <string name="domain">https://api.exchangeratesapi.io/</string>
 </resources>
