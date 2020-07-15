@@ -1,5 +1,7 @@
 package com.rakuten.assignment.base
 
+import io.reactivex.disposables.Disposable
+
 interface BaseContract {
 
     interface Model {
@@ -7,6 +9,11 @@ interface BaseContract {
     }
 
     interface View {
+        fun bind(disposable: Disposable)
+
+        fun showLoading()
+
+        fun hideLoading()
     }
 
     interface Presenter {
