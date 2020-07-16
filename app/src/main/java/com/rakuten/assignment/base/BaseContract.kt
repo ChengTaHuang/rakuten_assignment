@@ -14,6 +14,8 @@ interface BaseContract {
         fun showLoading()
 
         fun hideLoading()
+
+        fun showError()
     }
 
     interface Presenter {

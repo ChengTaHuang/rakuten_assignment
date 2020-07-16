@@ -16,7 +16,7 @@ class MainPresenterImpl(
                 view.showExchangeRates(it.rates)
                 view.showUpdateTime(it.date)
             }, {
-
+                view.showError()
             }).bind(view)
     }
 
