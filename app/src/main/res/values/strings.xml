@@ -2,4 +2,5 @@
     <string name="app_name">rakuten-assignment</string>
     <string name="domain">https://api.exchangeratesapi.io/</string>
     <string name="something_went_wrong">Oops! Something went wrong</string>
+    <string name="amount_hint">0.0</string>
 </resources>
