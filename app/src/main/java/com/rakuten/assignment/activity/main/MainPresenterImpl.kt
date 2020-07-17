@@ -11,10 +11,15 @@ class MainPresenterImpl(
     override fun startGettingExchangeRates() {
         model.getExchangeRate()
             .subscribeOn(Schedulers.io())
+            .flatMap {
+                model.convertToCountryExchangeRate(it)
+            }
+            .doAfterSuccess {
+                view.showUpdateTime(model.getCurrentTime())
+            }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
-                view.showExchangeRates(it.rates)
-                view.showUpdateTime(it.date)
+                view.showExchangeRates(it)
             }, {
                 view.showError()
             }).bind(view)

@@ -1,16 +1,20 @@
 package com.rakuten.assignment.activity.main
 
 import com.rakuten.assignment.base.BaseContract
+import com.rakuten.assignment.bean.CountryExchangeRate
 import com.rakuten.assignment.bean.ExchangeRatesResponse
 import io.reactivex.Single
 
 class MainContract {
     interface Model : BaseContract.Model {
         fun getExchangeRate(): Single<ExchangeRatesResponse>
+
+        fun convertToCountryExchangeRate(data : ExchangeRatesResponse) : Single<List<CountryExchangeRate>>
+        fun getCurrentTime(): String
     }
 
     interface View : BaseContract.View {
-        fun showExchangeRates(rates: Map<String, Double>)
+        fun showExchangeRates(countryExchangeRates : List<CountryExchangeRate>)
 
         fun showUpdateTime(date : String)
     }

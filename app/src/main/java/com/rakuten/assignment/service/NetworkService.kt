@@ -10,9 +10,10 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
-object NetworkService {
-    lateinit var api: API
-    fun init(application: Application) {
+class NetworkService(application: Application) {
+    val api: API
+
+    init {
         api = configRetrofit(API::class.java, application.getString(R.string.domain))
     }
 
