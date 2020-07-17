@@ -8,6 +8,7 @@ import androidx.appcompat.widget.AppCompatTextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.aldoapps.autoformatedittext.AutoFormatEditText
 import com.mynameismidori.currencypicker.ExtendedCurrency
 import com.rakuten.assignment.R
 import com.rakuten.assignment.bean.CountryExchangeRate
@@ -22,7 +23,7 @@ class ExchangeRatesAdapter() :
         val inflater = LayoutInflater.from(parent.context)
         return when (viewType) {
             typeHead -> {
-                BaseViewHolder.ViewHolder(
+                BaseViewHolder.HeadViewHolder(
                     inflater.inflate(
                         R.layout.item_country_rate,
                         parent,
@@ -31,7 +32,7 @@ class ExchangeRatesAdapter() :
                 )
             }
             typeBody -> {
-                BaseViewHolder.ViewHolder(
+                BaseViewHolder.BodyViewHolder(
                     inflater.inflate(
                         R.layout.item_country_rate,
                         parent,
@@ -39,12 +40,15 @@ class ExchangeRatesAdapter() :
                     )
                 )
             }
-            else -> throw Exception("NOT SUPPORT THIS VIEW TYPE")
+            else -> throw Exception("NO SUPPORT THIS VIEW TYPE")
         }
     }
 
     override fun onBindViewHolder(holder: BaseViewHolder, position: Int) {
-        (holder as BaseViewHolder.ViewHolder).render(getItem(position))
+        when (holder) {
+            is BaseViewHolder.HeadViewHolder -> holder.render(getItem(position))
+            is BaseViewHolder.BodyViewHolder -> holder.render(getItem(position))
+        }
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -59,6 +63,7 @@ class ExchangeRatesAdapter() :
         private val imgFlag by lazy { itemView.findViewById<AppCompatImageView>(R.id.imgFlag) }
         private val tvRate by lazy { itemView.findViewById<AppCompatTextView>(R.id.tvRate) }
         private val tvCountryName by lazy { itemView.findViewById<AppCompatTextView>(R.id.tvCountryName) }
+        protected val editAmount by lazy { itemView.findViewById<AutoFormatEditText>(R.id.editAmount) }
         open fun render(data: CountryExchangeRate) {
             val currency = ExtendedCurrency.getCurrencyByISO(data.iso)
             imgFlag.setImageResource(currency.flag)
@@ -66,10 +71,19 @@ class ExchangeRatesAdapter() :
             tvCountryName.text = data.iso
         }
 
-        data class ViewHolder(val view: View) : BaseViewHolder(view) {
+        data class HeadViewHolder(val view: View) : BaseViewHolder(view) {
 
             override fun render(data: CountryExchangeRate) {
                 super.render(data)
+                editAmount.isEnabled = true
+            }
+        }
+
+        data class BodyViewHolder(val view: View) : BaseViewHolder(view) {
+
+            override fun render(data: CountryExchangeRate) {
+                super.render(data)
+                editAmount.isEnabled = false
             }
         }
     }
