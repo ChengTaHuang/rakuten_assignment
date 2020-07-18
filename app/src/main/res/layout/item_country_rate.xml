@@ -7,7 +7,9 @@
     android:layout_height="wrap_content"
     android:layout_margin="3dp"
     app:cardCornerRadius="4dp"
-    app:cardElevation="6dp">
+    app:cardElevation="6dp"
+    android:focusableInTouchMode="true"
+    android:descendantFocusability="beforeDescendants">
 
     <com.rakuten.assignment.custom.TouchConstraintLayout
         android:id="@+id/clBackground"

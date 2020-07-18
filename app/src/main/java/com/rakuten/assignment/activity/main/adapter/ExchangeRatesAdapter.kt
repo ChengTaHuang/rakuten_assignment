@@ -30,19 +30,8 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
     private var onAmountChangeListener: ((Double) -> Unit)? = null
     private var onBaseCountryChangeListener: ((iso: String) -> Unit)? = null
     private var itemData = mutableListOf<ItemData>()
-    private val keyboardManager: InputMethodManager by lazy {
-        recyclerView.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-    }
 
     init {
-//        recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-//            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-//                super.onScrollStateChanged(recyclerView, newState)
-//                if (newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL) {
-//                    keyboardManager.hideSoftInputFromWindow(recyclerView.windowToken, 0)
-//                }
-//            }
-//        })
         this.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
             override fun onItemRangeMoved(fromPosition: Int, toPosition: Int, itemCount: Int) {
                 super.onItemRangeMoved(fromPosition, toPosition, itemCount)
@@ -73,12 +62,9 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
                         R.layout.item_country_rate,
                         parent,
                         false
-                    )
-
-                ) { iso, currentAmount ->
-                    (itemData[0] as ItemData.HeadData).input = currentAmount
-                    onBaseCountryChangeListener?.invoke(iso)
-                }
+                    ),
+                    onBaseCountryChangeListener
+                )
             }
             else -> throw Exception("NO SUPPORT THIS VIEW TYPE")
         }
@@ -191,10 +177,11 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
 
         data class BodyViewHolder(
             val view: View,
-            val onBaseCountryChangeListener: ((iso: String , currentAmount : String) -> Unit)?
+            val onBaseCountryChangeListener: ((iso: String) -> Unit)?
         ) : BaseViewHolder(view) {
             fun render(data: ItemData.BodyData) {
                 super.render(data)
+                editAmount.clearFocus()
                 editAmount.isEnabled = false
                 imgFlag.isEnabled = false
                 tvRate.isEnabled = false
@@ -205,7 +192,7 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
                 editAmount.setText(amount)
                 editAmount.setSelection(editAmount.length())
                 clBackground.setOnClickListener {
-                    onBaseCountryChangeListener?.invoke(data.countryExchangeRate.iso , editAmount.text.toString())
+                    onBaseCountryChangeListener?.invoke(data.countryExchangeRate.iso)
                 }
             }
         }
