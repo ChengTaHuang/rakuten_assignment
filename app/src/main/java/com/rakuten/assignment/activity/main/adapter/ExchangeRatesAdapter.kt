@@ -26,7 +26,7 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
     ListAdapter<ItemData, ExchangeRatesAdapter.BaseViewHolder>(TaskDiffCallback()) {
     private val typeHead = 0
     private val typeBody = 1
-    private var onAmountChangeListener: ((Double) -> Unit)? = null
+    private var onAmountChangeListener: ((String) -> Unit)? = null
     private var onBaseCountryChangeListener: ((iso: String) -> Unit)? = null
     private var itemData = mutableListOf<ItemData>()
 
@@ -85,7 +85,7 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
         submitList(itemData.toMutableList())
     }
 
-    fun setOnAmountChangeListener(listener: ((Double) -> Unit)) {
+    fun setOnAmountChangeListener(listener: ((String) -> Unit)) {
         onAmountChangeListener = listener
     }
 
@@ -128,7 +128,7 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
         data class HeadViewHolder(
             val view: View,
             val onEditTextChangeListener: ((ItemData.HeadData) -> Unit),
-            val onAmountChangeListener: ((Double) -> Unit)?
+            val onAmountChangeListener: ((String) -> Unit)?
         ) : BaseViewHolder(view) {
             @SuppressLint("ClickableViewAccessibility")
             fun render(data: ItemData.HeadData) {
@@ -148,7 +148,8 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
                     override fun afterTextChanged(text: Editable?) {
                         text?.let {
                             val cleanAmount = text.toString().replace("[,.]".toRegex(), "")
-                            onAmountChangeListener?.invoke(if (cleanAmount.isEmpty()) 0.0 else cleanAmount.toDouble())
+                            val withOutCommaAmount = text.toString().replace("[,]".toRegex(), "")
+                            onAmountChangeListener?.invoke(if (cleanAmount.isEmpty()) "0.0" else withOutCommaAmount)
                             onEditTextChangeListener.invoke(data.copy(input = it.toString()))
                         }
                     }

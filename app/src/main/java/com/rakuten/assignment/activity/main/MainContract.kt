@@ -13,7 +13,7 @@ class MainContract {
 
         fun getCurrentTime(): String
 
-        fun setAmount(amount: Double) : Single<List<CountryExchangeRate>>
+        fun setAmount(amount: String) : Single<List<CountryExchangeRate>>
 
         fun changeBaseCountry(iso : String) : Single<List<CountryExchangeRate>>
     }
@@ -30,7 +30,7 @@ class MainContract {
 
         fun stopGettingExchangeRates()
 
-        fun setAmount(amount: Double)
+        fun setAmount(amount: String)
 
         fun setBaseCountry(iso: String)
     }

@@ -1,5 +1,6 @@
 package com.rakuten.assignment.activity.main
 
+import android.util.Log
 import com.rakuten.assignment.base.BaseModelImpl
 import com.rakuten.assignment.bean.CountryExchangeRate
 import com.rakuten.assignment.bean.ExchangeRatesResponse
@@ -49,7 +50,7 @@ class MainModelImpl(private val repo: MainRepository) : BaseModelImpl(),
         return Single.just(countryExchangeRates)
     }
 
-    override fun setAmount(amount: Double): Single<List<CountryExchangeRate>> {
+    override fun setAmount(amount: String): Single<List<CountryExchangeRate>> {
         val update = mutableListOf<CountryExchangeRate>()
         countryExchangeRates.forEach {
             update.add(CountryExchangeRate(it.iso, it.exchangeEUR, it.rate, calAmount(amount, it.rate), it.base))
@@ -87,8 +88,9 @@ class MainModelImpl(private val repo: MainRepository) : BaseModelImpl(),
 
     }
 
-    private fun calAmount(amount: Double, rate: BigDecimal): BigDecimal {
-        val value = BigDecimal(amount.toString())
+    private fun calAmount(amount: String, rate: BigDecimal): BigDecimal {
+        val value = BigDecimal(amount)
+        Log.i("check", "$amount , ${value} , ${rate} , ${value.multiply(rate)}")
         return value.multiply(rate).setScale(4, BigDecimal.ROUND_HALF_UP)
     }
 

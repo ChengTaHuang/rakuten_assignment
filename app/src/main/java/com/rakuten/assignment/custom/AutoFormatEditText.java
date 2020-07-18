@@ -3,6 +3,7 @@ package com.rakuten.assignment.custom;
 import android.content.Context;
 import android.text.InputFilter;
 import android.util.AttributeSet;
+import android.util.Log;
 import androidx.appcompat.widget.AppCompatEditText;
 
 import java.util.StringTokenizer;
@@ -67,6 +68,7 @@ public class AutoFormatEditText extends AppCompatEditText {
         int newStart = start;
 
         try {
+            Log.i("check" , "new "+s.toString());
             // Extract value without its comma
             String digitAndDotText = s.toString().replace(",", "");
             int commaAmount = 0;
@@ -113,7 +115,7 @@ public class AutoFormatEditText extends AppCompatEditText {
                 }
 
             } else {
-                result = AutoFormatUtil.formatWithDecimal(digitAndDotText);
+                result = AutoFormatUtil.formatToStringWithoutDecimal(digitAndDotText);
                 sbResult.append(result);
             }
 
@@ -156,6 +158,7 @@ public class AutoFormatEditText extends AppCompatEditText {
 
         } catch (NumberFormatException | IndexOutOfBoundsException e) {
             e.printStackTrace();
+            Log.i("check" , "error "+e);
         }
     }
 }

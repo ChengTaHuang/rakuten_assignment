@@ -1,5 +1,6 @@
 package com.rakuten.assignment.custom;
 
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
@@ -7,7 +8,7 @@ public class AutoFormatUtil {
 
     private static final String FORMAT_NO_DECIMAL = "###,###";
 
-    private static final String FORMAT_WITH_DECIMAL = "###,###.###";
+    private static final String FORMAT_WITH_DECIMAL = "###,###.####";
 
     public static int getCharOccurance(String input, char c) {
         int occurance = 0;
@@ -30,7 +31,8 @@ public class AutoFormatUtil {
     }
 
     public static String formatToStringWithoutDecimal(String value) {
-        return formatToStringWithoutDecimal(Double.parseDouble(value));
+        NumberFormat formatter = new DecimalFormat(FORMAT_NO_DECIMAL);
+        return formatter.format(new BigDecimal(value));
     }
 
     public static String formatWithDecimal(String price) {
