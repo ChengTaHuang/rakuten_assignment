@@ -116,9 +116,9 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
     }
 
     sealed class BaseViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val imgFlag by lazy { itemView.findViewById<AppCompatImageView>(R.id.imgFlag) }
-        private val tvRate by lazy { itemView.findViewById<AppCompatTextView>(R.id.tvRate) }
-        private val tvCountryName by lazy { itemView.findViewById<AppCompatTextView>(R.id.tvCountryName) }
+        protected val imgFlag by lazy { itemView.findViewById<AppCompatImageView>(R.id.imgFlag) }
+        protected val tvRate by lazy { itemView.findViewById<AppCompatTextView>(R.id.tvRate) }
+        protected val tvCountryName by lazy { itemView.findViewById<AppCompatTextView>(R.id.tvCountryName) }
         protected val editAmount by lazy { itemView.findViewById<AutoFormatEditText>(R.id.editAmount) }
         protected val clBackground by lazy { itemView.findViewById<ConstraintLayout>(R.id.clBackground) }
         protected val keyboardManager: InputMethodManager by lazy {
@@ -188,6 +188,9 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
             override fun render(data: ItemData) {
                 super.render(data)
                 editAmount.isEnabled = false
+                imgFlag.isEnabled = false
+                tvRate.isEnabled = false
+                tvCountryName.isEnabled = false
                 val amount = if(data.countryExchangeRate.amount.toDouble() == 0.0) "" else{
                     String.format(data.countryExchangeRate.amount.toString())
                 }

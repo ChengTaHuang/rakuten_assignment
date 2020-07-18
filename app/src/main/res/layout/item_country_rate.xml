@@ -9,7 +9,7 @@
     app:cardCornerRadius="4dp"
     app:cardElevation="6dp">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <com.rakuten.assignment.custom.TouchConstraintLayout
         android:id="@+id/clBackground"
         android:layout_width="match_parent"
         android:layout_height="60dp"
@@ -80,5 +80,5 @@
             app:layout_constraintStart_toStartOf="@+id/editAmount"
             app:layout_constraintTop_toBottomOf="@+id/editAmount"
             tools:text="1 TWD = 1 USD" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.rakuten.assignment.custom.TouchConstraintLayout>
 </androidx.cardview.widget.CardView>
