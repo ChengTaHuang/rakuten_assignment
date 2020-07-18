@@ -90,7 +90,6 @@ class MainModelImpl(private val repo: MainRepository) : BaseModelImpl(),
 
     private fun calAmount(amount: String, rate: BigDecimal): BigDecimal {
         val value = BigDecimal(amount)
-        Log.i("check", "$amount , ${value} , ${rate} , ${value.multiply(rate)}")
         return value.multiply(rate).setScale(4, BigDecimal.ROUND_HALF_UP)
     }
 

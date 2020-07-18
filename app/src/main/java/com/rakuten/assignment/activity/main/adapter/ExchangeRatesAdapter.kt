@@ -19,6 +19,7 @@ import com.mynameismidori.currencypicker.ExtendedCurrency
 import com.rakuten.assignment.R
 import com.rakuten.assignment.bean.CountryExchangeRate
 import com.rakuten.assignment.custom.AutoFormatEditText
+import com.rakuten.assignment.utils.howManyNumberCanItPut
 import com.rakuten.assignment.utils.removeAmountLastZero
 
 
@@ -28,7 +29,9 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
     private val typeBody = 1
     private var onAmountChangeListener: ((String) -> Unit)? = null
     private var onBaseCountryChangeListener: ((iso: String) -> Unit)? = null
+    private var onIsFitAmountEditTextListener: ((Boolean) -> Unit)? = null
     private var itemData = mutableListOf<ItemData>()
+    private var maximumNumberOfDigital = Int.MAX_VALUE
 
     init {
         this.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
@@ -52,6 +55,9 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
                     {
                         itemData[0] = it
                     },
+                    {
+                        if (it in 1 until maximumNumberOfDigital) maximumNumberOfDigital = it
+                    },
                     onAmountChangeListener
                 )
             }
@@ -62,6 +68,9 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
                         parent,
                         false
                     ),
+                    {
+
+                    },
                     onBaseCountryChangeListener
                 )
             }
@@ -81,7 +90,7 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
     }
 
     fun update(data: List<CountryExchangeRate>) {
-        itemData = convertToItemData(data)
+        itemData = convertToItemData(data, maximumNumberOfDigital)
         submitList(itemData.toMutableList())
     }
 
@@ -93,12 +102,18 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
         onBaseCountryChangeListener = listener
     }
 
-    private fun convertToItemData(data: List<CountryExchangeRate>): MutableList<ItemData> {
+    private fun convertToItemData(data: List<CountryExchangeRate>, maximumNumberOfDigital: Int): MutableList<ItemData> {
         val newItemData = mutableListOf<ItemData>()
+        val maxAmountLength = data.maxBy {
+            it.amount.toPlainString().removeAmountLastZero().replace("[,.]".toRegex(), "").length
+        }?.amount?.toPlainString()?.removeAmountLastZero()?.replace("[,.]".toRegex(), "")?.length ?: 0
+
         data.forEach {
-            val input = if (this.itemData.isNotEmpty()) (this.itemData[0] as ItemData.HeadData).input else ""
-            if (newItemData.isEmpty()) newItemData.add(ItemData.HeadData(it, input))
-            else newItemData.add(ItemData.BodyData(it, it.amount.toPlainString().removeAmountLastZero()))
+            if (newItemData.isEmpty()) {
+                val input = if (this.itemData.isNotEmpty()) (this.itemData[0] as ItemData.HeadData).input else ""
+                val isFit = (input.length >= maximumNumberOfDigital || maxAmountLength >= maximumNumberOfDigital)
+                newItemData.add(ItemData.HeadData(it, input, isFit))
+            } else newItemData.add(ItemData.BodyData(it, it.amount.toPlainString().removeAmountLastZero()))
         }
         return newItemData
     }
@@ -128,6 +143,7 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
         data class HeadViewHolder(
             val view: View,
             val onEditTextChangeListener: ((ItemData.HeadData) -> Unit),
+            val onIsFitAmountEditTextListener: ((Int) -> Unit),
             val onAmountChangeListener: ((String) -> Unit)?
         ) : BaseViewHolder(view) {
             @SuppressLint("ClickableViewAccessibility")
@@ -142,6 +158,7 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
                         keyboardManager.hideSoftInputFromWindow(view.windowToken, 0)
                     }
                 }
+                if (data.isAmountFitEditText) editAmount.setNotAllowInput()
                 editAmount.setText(data.input)
                 editAmount.setSelection(editAmount.text.toString().length)
                 editAmount.addTextChangedListener(object : TextWatcher {
@@ -151,18 +168,19 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
                             val withOutCommaAmount = text.toString().replace("[,]".toRegex(), "")
                             onAmountChangeListener?.invoke(if (cleanAmount.isEmpty()) "0.0" else withOutCommaAmount)
                             onEditTextChangeListener.invoke(data.copy(input = it.toString()))
+                            editAmount.removeTextChangedListener(this)
+
                         }
                     }
 
-                    override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-
+                    override fun beforeTextChanged(text: CharSequence, p1: Int, p2: Int, p3: Int) {
                     }
 
-                    override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-
+                    override fun onTextChanged(text: CharSequence?, p1: Int, p2: Int, p3: Int) {
                     }
 
                 })
+                onIsFitAmountEditTextListener.invoke(editAmount.howManyNumberCanItPut())
                 clBackground.setOnClickListener {
                     setEditAble(editAmount)
                 }
@@ -177,6 +195,7 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
 
         data class BodyViewHolder(
             val view: View,
+            val onIsFitAmountEditTextListener: ((Boolean) -> Unit),
             val onBaseCountryChangeListener: ((iso: String) -> Unit)?
         ) : BaseViewHolder(view) {
             fun render(data: ItemData.BodyData) {
