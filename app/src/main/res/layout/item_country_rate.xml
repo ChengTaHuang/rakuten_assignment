@@ -45,7 +45,7 @@
             app:layout_constraintTop_toTopOf="parent"
             tools:text="TWD" />
 
-        <com.aldoapps.autoformatedittext.AutoFormatEditText
+        <com.rakuten.assignment.custom.AutoFormatEditText
             android:id="@+id/editAmount"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -62,7 +62,6 @@
             android:textCursorDrawable="@drawable/edit_cursor_color"
             android:textSize="20sp"
             android:textStyle="bold"
-            app:isDecimal="true"
             app:layout_constraintBottom_toTopOf="@+id/tvRate"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/tvCountryName"

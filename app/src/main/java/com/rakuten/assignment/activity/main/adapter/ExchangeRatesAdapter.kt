@@ -8,7 +8,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
-import android.widget.AbsListView
 import android.widget.EditText
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
@@ -16,10 +15,10 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.aldoapps.autoformatedittext.AutoFormatEditText
 import com.mynameismidori.currencypicker.ExtendedCurrency
 import com.rakuten.assignment.R
 import com.rakuten.assignment.bean.CountryExchangeRate
+import com.rakuten.assignment.custom.AutoFormatEditText
 import com.rakuten.assignment.utils.removeAmountLastZero
 
 
@@ -99,7 +98,7 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
         data.forEach {
             val input = if (this.itemData.isNotEmpty()) (this.itemData[0] as ItemData.HeadData).input else ""
             if (newItemData.isEmpty()) newItemData.add(ItemData.HeadData(it, input))
-            else newItemData.add(ItemData.BodyData(it , it.amount.toPlainString().removeAmountLastZero()))
+            else newItemData.add(ItemData.BodyData(it, it.amount.toPlainString().removeAmountLastZero()))
         }
         return newItemData
     }
@@ -139,7 +138,7 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
                     true
                 }
                 editAmount.setOnFocusChangeListener { view, focus ->
-                    if(!focus){
+                    if (!focus) {
                         keyboardManager.hideSoftInputFromWindow(view.windowToken, 0)
                     }
                 }
@@ -186,7 +185,7 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
                 imgFlag.isEnabled = false
                 tvRate.isEnabled = false
                 tvCountryName.isEnabled = false
-                val amount = if(data.print.toDouble() == 0.0) "" else{
+                val amount = if (data.print.toDouble() == 0.0) "" else {
                     String.format(data.print)
                 }
                 editAmount.setText(amount)

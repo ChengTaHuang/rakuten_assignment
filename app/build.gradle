@@ -58,5 +58,4 @@ dependencies {
     implementation "org.koin:koin-androidx-viewmodel:$koinVersion"
     implementation "org.koin:koin-androidx-ext:$koinVersion"
 
-    implementation 'com.aldoapps:autoformatedittext:0.9.3'
 }
