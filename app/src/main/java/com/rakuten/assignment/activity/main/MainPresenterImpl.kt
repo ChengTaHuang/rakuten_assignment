@@ -28,4 +28,15 @@ class MainPresenterImpl(
     override fun stopGettingExchangeRates() {
 
     }
+
+    override fun setAmount(amount: Double) {
+        model.setAmount(amount)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+                view.showExchangeRates(it)
+            },{
+                view.showError()
+            }).bind(view)
+    }
 }

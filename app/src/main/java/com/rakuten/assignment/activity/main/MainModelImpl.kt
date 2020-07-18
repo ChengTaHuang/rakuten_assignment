@@ -4,11 +4,10 @@ import com.rakuten.assignment.base.BaseModelImpl
 import com.rakuten.assignment.bean.CountryExchangeRate
 import com.rakuten.assignment.bean.ExchangeRatesResponse
 import io.reactivex.Single
-import java.math.BigDecimal
 
 class MainModelImpl(private val repo: MainRepository) : BaseModelImpl(),
     MainContract.Model {
-    private val countryExchangeRates = mutableListOf<CountryExchangeRate>()
+    private var countryExchangeRates = mutableListOf<CountryExchangeRate>()
     override fun getExchangeRate(): Single<ExchangeRatesResponse> {
         return repo.getExchangeRate()
     }
@@ -28,9 +27,9 @@ class MainModelImpl(private val repo: MainRepository) : BaseModelImpl(),
 
     private fun addExchangeData(rates: Map<String, Double>, base: String): List<CountryExchangeRate> {
         val countryExchangeRates = mutableListOf<CountryExchangeRate>()
-        countryExchangeRates.add(CountryExchangeRate(base, 1.0, BigDecimal(0.0), base))
+        countryExchangeRates.add(CountryExchangeRate(base, 1.0, 0.0, base))
         for ((iso, rate) in rates) {
-            countryExchangeRates.add(CountryExchangeRate(iso, rate, BigDecimal(0.0), base))
+            countryExchangeRates.add(CountryExchangeRate(iso, rate, 0.0, base))
         }
         return countryExchangeRates.toList()
     }
@@ -50,5 +49,14 @@ class MainModelImpl(private val repo: MainRepository) : BaseModelImpl(),
                 }
             }
         }.toMutableList()
+    }
+
+    override fun setAmount(amount: Double): Single<List<CountryExchangeRate>> {
+        val update = mutableListOf<CountryExchangeRate>()
+        countryExchangeRates.forEach {
+            update.add(CountryExchangeRate(it.iso , it.rate , amount * it.rate , it.base))
+        }
+        countryExchangeRates = update
+        return Single.just(countryExchangeRates)
     }
 }

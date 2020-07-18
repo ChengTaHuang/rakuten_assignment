@@ -43,5 +43,12 @@ class MainActivity : BaseActivity(), MainContract.View {
             layoutManager = LinearLayoutManager(baseContext)
             adapter = exchangeRatesAdapter
         }
+        setCallBackListener()
+    }
+
+    private fun setCallBackListener(){
+        exchangeRatesAdapter.setOnAmountChangeListener {
+            presenter.setAmount(it)
+        }
     }
 }
