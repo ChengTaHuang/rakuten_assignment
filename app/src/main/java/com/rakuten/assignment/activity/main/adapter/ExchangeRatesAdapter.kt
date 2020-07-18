@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.aldoapps.autoformatedittext.AutoFormatEditText
 import com.mynameismidori.currencypicker.ExtendedCurrency
+import com.rakuten.assignment.R
 import com.rakuten.assignment.bean.CountryExchangeRate
 import com.rakuten.assignment.utils.removeAmountLastZero
 
@@ -56,7 +57,7 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
             typeHead -> {
                 BaseViewHolder.HeadViewHolder(
                     inflater.inflate(
-                        com.rakuten.assignment.R.layout.item_country_rate,
+                        R.layout.item_country_rate,
                         parent,
                         false
                     ),
@@ -69,7 +70,7 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
             typeBody -> {
                 BaseViewHolder.BodyViewHolder(
                     inflater.inflate(
-                        com.rakuten.assignment.R.layout.item_country_rate,
+                        R.layout.item_country_rate,
                         parent,
                         false
                     ),
@@ -115,11 +116,11 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
     }
 
     sealed class BaseViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val imgFlag by lazy { itemView.findViewById<AppCompatImageView>(com.rakuten.assignment.R.id.imgFlag) }
-        private val tvRate by lazy { itemView.findViewById<AppCompatTextView>(com.rakuten.assignment.R.id.tvRate) }
-        private val tvCountryName by lazy { itemView.findViewById<AppCompatTextView>(com.rakuten.assignment.R.id.tvCountryName) }
-        protected val editAmount by lazy { itemView.findViewById<AutoFormatEditText>(com.rakuten.assignment.R.id.editAmount) }
-        protected val clBackground by lazy { itemView.findViewById<ConstraintLayout>(com.rakuten.assignment.R.id.clBackground) }
+        private val imgFlag by lazy { itemView.findViewById<AppCompatImageView>(R.id.imgFlag) }
+        private val tvRate by lazy { itemView.findViewById<AppCompatTextView>(R.id.tvRate) }
+        private val tvCountryName by lazy { itemView.findViewById<AppCompatTextView>(R.id.tvCountryName) }
+        protected val editAmount by lazy { itemView.findViewById<AutoFormatEditText>(R.id.editAmount) }
+        protected val clBackground by lazy { itemView.findViewById<ConstraintLayout>(R.id.clBackground) }
         protected val keyboardManager: InputMethodManager by lazy {
             itemView.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         }
@@ -128,7 +129,7 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
             val currency = ExtendedCurrency.getCurrencyByISO(data.countryExchangeRate.iso)
             imgFlag.setImageResource(currency.flag)
             tvRate.text = itemView.context.getString(
-                com.rakuten.assignment.R.string.exchange_rate_label,
+                R.string.exchange_rate_label,
                 data.countryExchangeRate.base,
                 data.countryExchangeRate.rate.toString().removeAmountLastZero(),
                 data.countryExchangeRate.iso
