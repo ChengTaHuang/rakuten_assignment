@@ -14,6 +14,8 @@ class MainContract {
         fun getCurrentTime(): String
 
         fun setAmount(amount: Double) : Single<List<CountryExchangeRate>>
+
+        fun changeBaseCountry(iso : String) : Single<List<CountryExchangeRate>>
     }
 
     interface View : BaseContract.View {
@@ -29,5 +31,7 @@ class MainContract {
         fun stopGettingExchangeRates()
 
         fun setAmount(amount: Double)
+
+        fun setBaseCountry(iso: String)
     }
 }

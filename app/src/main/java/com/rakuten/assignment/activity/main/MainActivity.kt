@@ -1,6 +1,8 @@
 package com.rakuten.assignment.activity.main
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.rakuten.assignment.R
 import com.rakuten.assignment.activity.BaseActivity
@@ -32,6 +34,7 @@ class MainActivity : BaseActivity(), MainContract.View {
 
     override fun showExchangeRates(countryExchangeRates: List<CountryExchangeRate>) {
         exchangeRatesAdapter.update(countryExchangeRates)
+
     }
 
     override fun showUpdateTime(date: String) {
@@ -42,6 +45,7 @@ class MainActivity : BaseActivity(), MainContract.View {
         with(rvContent) {
             layoutManager = LinearLayoutManager(baseContext)
             adapter = exchangeRatesAdapter
+            itemAnimator = null
         }
         setCallBackListener()
     }
@@ -49,6 +53,9 @@ class MainActivity : BaseActivity(), MainContract.View {
     private fun setCallBackListener(){
         exchangeRatesAdapter.setOnAmountChangeListener {
             presenter.setAmount(it)
+        }
+        exchangeRatesAdapter.setOnBaseCountryChangeListener {
+            presenter.setBaseCountry(it)
         }
     }
 }

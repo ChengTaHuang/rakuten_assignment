@@ -1,5 +1,6 @@
 package com.rakuten.assignment.activity.main
 
+import android.util.Log
 import com.rakuten.assignment.rxjava.bind
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -29,9 +30,20 @@ class MainPresenterImpl(
 
     }
 
+    override fun setBaseCountry(iso: String) {
+        model.changeBaseCountry(iso)
+            .subscribeOn(AndroidSchedulers.mainThread())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+                view.showExchangeRates(it)
+            },{
+                view.showError()
+            }).bind(view)
+    }
+
     override fun setAmount(amount: Double) {
         model.setAmount(amount)
-            .subscribeOn(Schedulers.io())
+            .subscribeOn(AndroidSchedulers.mainThread())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
                 view.showExchangeRates(it)

@@ -2,8 +2,11 @@ package com.rakuten.assignment.activity.main.adapter
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,14 +21,15 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.aldoapps.autoformatedittext.AutoFormatEditText
 import com.mynameismidori.currencypicker.ExtendedCurrency
-import com.rakuten.assignment.R
 import com.rakuten.assignment.bean.CountryExchangeRate
 
-class ExchangeRatesAdapter(val recyclerView: RecyclerView) :
+
+class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
     ListAdapter<ItemData, ExchangeRatesAdapter.BaseViewHolder>(TaskDiffCallback()) {
     private val typeHead = 0
     private val typeBody = 1
     private var onAmountChangeListener: ((Double) -> Unit)? = null
+    private var onBaseCountryChangeListener: ((iso: String) -> Unit)? = null
     private var itemData = mutableListOf<ItemData>()
     private val keyboardManager: InputMethodManager by lazy {
         recyclerView.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -40,6 +44,12 @@ class ExchangeRatesAdapter(val recyclerView: RecyclerView) :
                 }
             }
         })
+        this.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+            override fun onItemRangeMoved(fromPosition: Int, toPosition: Int, itemCount: Int) {
+                super.onItemRangeMoved(fromPosition, toPosition, itemCount)
+                recyclerView.smoothScrollToPosition(0)
+            }
+        })
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder {
@@ -48,7 +58,7 @@ class ExchangeRatesAdapter(val recyclerView: RecyclerView) :
             typeHead -> {
                 BaseViewHolder.HeadViewHolder(
                     inflater.inflate(
-                        R.layout.item_country_rate,
+                        com.rakuten.assignment.R.layout.item_country_rate,
                         parent,
                         false
                     ),
@@ -61,10 +71,11 @@ class ExchangeRatesAdapter(val recyclerView: RecyclerView) :
             typeBody -> {
                 BaseViewHolder.BodyViewHolder(
                     inflater.inflate(
-                        R.layout.item_country_rate,
+                        com.rakuten.assignment.R.layout.item_country_rate,
                         parent,
                         false
-                    )
+                    ),
+                    onBaseCountryChangeListener
                 )
             }
             else -> throw Exception("NO SUPPORT THIS VIEW TYPE")
@@ -84,11 +95,15 @@ class ExchangeRatesAdapter(val recyclerView: RecyclerView) :
 
     fun update(data: List<CountryExchangeRate>) {
         itemData = convertToItemData(data)
-        submitList(itemData)
+        submitList(itemData.toMutableList())
     }
 
     fun setOnAmountChangeListener(listener: ((Double) -> Unit)) {
         onAmountChangeListener = listener
+    }
+
+    fun setOnBaseCountryChangeListener(listener: ((iso: String) -> Unit)) {
+        onBaseCountryChangeListener = listener
     }
 
     private fun convertToItemData(data: List<CountryExchangeRate>): MutableList<ItemData> {
@@ -102,10 +117,10 @@ class ExchangeRatesAdapter(val recyclerView: RecyclerView) :
     }
 
     sealed class BaseViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val imgFlag by lazy { itemView.findViewById<AppCompatImageView>(R.id.imgFlag) }
-        private val tvRate by lazy { itemView.findViewById<AppCompatTextView>(R.id.tvRate) }
-        private val tvCountryName by lazy { itemView.findViewById<AppCompatTextView>(R.id.tvCountryName) }
-        protected val editAmount by lazy { itemView.findViewById<AutoFormatEditText>(R.id.editAmount) }
+        private val imgFlag by lazy { itemView.findViewById<AppCompatImageView>(com.rakuten.assignment.R.id.imgFlag) }
+        private val tvRate by lazy { itemView.findViewById<AppCompatTextView>(com.rakuten.assignment.R.id.tvRate) }
+        private val tvCountryName by lazy { itemView.findViewById<AppCompatTextView>(com.rakuten.assignment.R.id.tvCountryName) }
+        protected val editAmount by lazy { itemView.findViewById<AutoFormatEditText>(com.rakuten.assignment.R.id.editAmount) }
         protected val keyboardManager: InputMethodManager by lazy {
             itemView.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         }
@@ -114,7 +129,7 @@ class ExchangeRatesAdapter(val recyclerView: RecyclerView) :
             val currency = ExtendedCurrency.getCurrencyByISO(data.countryExchangeRate.iso)
             imgFlag.setImageResource(currency.flag)
             tvRate.text = itemView.context.getString(
-                R.string.exchange_rate_label,
+                com.rakuten.assignment.R.string.exchange_rate_label,
                 data.countryExchangeRate.iso,
                 data.countryExchangeRate.baseRate,
                 data.countryExchangeRate.base
@@ -127,7 +142,7 @@ class ExchangeRatesAdapter(val recyclerView: RecyclerView) :
             val onEditTextChangeListener: ((ItemData.HeadData) -> Unit),
             val onAmountChangeListener: ((Double) -> Unit)?
         ) : BaseViewHolder(view) {
-            private val clBackground by lazy { itemView.findViewById<ConstraintLayout>(R.id.clBackground) }
+            protected val clBackground by lazy { itemView.findViewById<ConstraintLayout>(com.rakuten.assignment.R.id.clBackground) }
             @SuppressLint("ClickableViewAccessibility")
             fun render(data: ItemData.HeadData) {
                 super.render(data)
@@ -167,13 +182,19 @@ class ExchangeRatesAdapter(val recyclerView: RecyclerView) :
             }
         }
 
-        data class BodyViewHolder(val view: View) : BaseViewHolder(view) {
-
+        data class BodyViewHolder(
+            val view: View,
+            val onBaseCountryChangeListener: ((iso: String) -> Unit)?
+        ) : BaseViewHolder(view) {
+            protected val clBackground by lazy { itemView.findViewById<ConstraintLayout>(com.rakuten.assignment.R.id.clBackground) }
             override fun render(data: ItemData) {
                 super.render(data)
                 editAmount.isEnabled = false
                 editAmount.setText(data.countryExchangeRate.amount.toString())
                 editAmount.setSelection(editAmount.length())
+                clBackground.setOnClickListener {
+                    onBaseCountryChangeListener?.invoke(data.countryExchangeRate.iso)
+                }
             }
         }
     }
