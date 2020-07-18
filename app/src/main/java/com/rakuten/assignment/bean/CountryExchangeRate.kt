@@ -4,9 +4,8 @@ import java.math.BigDecimal
 
 data class CountryExchangeRate(
     val iso: String,
-    val rate: Double,
+    val exchangeEUR : Double,
+    val rate: BigDecimal,
     val amount: BigDecimal,
     val base: String
-) {
-    val baseRate: Double = 1 / rate
-}
+)

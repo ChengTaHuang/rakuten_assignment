@@ -30,18 +30,18 @@ class MainModelImpl(private val repo: MainRepository) : BaseModelImpl(),
     override fun changeBaseCountry(iso: String): Single<List<CountryExchangeRate>> {
         val update = mutableListOf<CountryExchangeRate>()
         val countryExchangeRate = countryExchangeRates.find { it.iso == iso }!!
-        update.add(countryExchangeRate.copy(base = iso, rate = 1.0))
+        update.add(countryExchangeRate.copy(base = iso, rate = BigDecimal(1.0.toString())))
         countryExchangeRates
             .filter { it.iso != countryExchangeRate.iso }
             .forEach {
+                val newRate = calNewExchangeRate(it.exchangeEUR, countryExchangeRate.exchangeEUR)
                 update.add(
                     CountryExchangeRate(
                         it.iso,
-                        BigDecimal(it.rate.toString()).divide(
-                            BigDecimal(countryExchangeRate.rate.toString()),
-                            4,
-                            RoundingMode.FLOOR
-                        ).toDouble(), it.amount, countryExchangeRate.iso
+                        it.exchangeEUR,
+                        newRate,
+                        it.amount,
+                        countryExchangeRate.iso
                     )
                 )
             }
@@ -52,7 +52,7 @@ class MainModelImpl(private val repo: MainRepository) : BaseModelImpl(),
     override fun setAmount(amount: Double): Single<List<CountryExchangeRate>> {
         val update = mutableListOf<CountryExchangeRate>()
         countryExchangeRates.forEach {
-            update.add(CountryExchangeRate(it.iso, it.rate, calAmount(amount, it.rate), it.base))
+            update.add(CountryExchangeRate(it.iso, it.exchangeEUR, it.rate, calAmount(amount, it.rate), it.base))
         }
         countryExchangeRates = update
         return Single.just(countryExchangeRates)
@@ -60,32 +60,40 @@ class MainModelImpl(private val repo: MainRepository) : BaseModelImpl(),
 
     private fun addExchangeData(rates: Map<String, Double>, base: String): List<CountryExchangeRate> {
         val countryExchangeRates = mutableListOf<CountryExchangeRate>()
-        countryExchangeRates.add(CountryExchangeRate(base, 1.0, BigDecimal(0.0), base))
+        countryExchangeRates.add(
+            CountryExchangeRate(
+                base,
+                1.0,
+                BigDecimal(1.0.toString()),
+                BigDecimal(0.0.toString()),
+                base
+            )
+        )
         for ((iso, rate) in rates) {
-            countryExchangeRates.add(CountryExchangeRate(iso, rate, BigDecimal(0.0), base))
+            countryExchangeRates.add(
+                CountryExchangeRate(
+                    iso,
+                    rate,
+                    BigDecimal(rate.toString()),
+                    BigDecimal(0.0.toString()),
+                    base
+                )
+            )
         }
         return countryExchangeRates.toList()
     }
 
     private fun updateExchangeRate(rates: Map<String, Double>, countryExchangeRates: MutableList<CountryExchangeRate>) {
-//        val updateData = countryExchangeRates.map { it.copy() }.toMutableList().apply {
-//            this.forEachIndexed { index, countryExchangeRate ->
-//                if (rates.containsKey(countryExchangeRate.iso)) {
-//                    set(index, countryExchangeRate.copy(rate = rates.getValue(countryExchangeRate.iso)))
-//                }
-//            }
-//        }.toMutableList()
-        val updateData = countryExchangeRates.apply {
-            this.forEachIndexed { index, countryExchangeRate ->
-                if (rates.containsKey(countryExchangeRate.iso)) {
-                    set(index, countryExchangeRate.copy(rate = rates.getValue(countryExchangeRate.iso)))
-                }
-            }
-        }.toMutableList()
+
     }
 
-    private fun calAmount(amount: Double, rate: Double): BigDecimal {
-        val value = BigDecimal(amount * rate)
-        return value.setScale(4, BigDecimal.ROUND_DOWN)
+    private fun calAmount(amount: Double, rate: BigDecimal): BigDecimal {
+        val value = BigDecimal(amount.toString())
+        return value.multiply(rate).setScale(4, BigDecimal.ROUND_HALF_UP)
+    }
+
+    private fun calNewExchangeRate(countryRate: Double, EURRate: Double): BigDecimal {
+        return BigDecimal(countryRate)
+            .divide(BigDecimal(EURRate.toString()), 4, RoundingMode.HALF_UP)
     }
 }

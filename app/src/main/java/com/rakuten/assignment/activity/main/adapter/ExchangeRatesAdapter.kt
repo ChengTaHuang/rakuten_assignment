@@ -35,14 +35,14 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
     }
 
     init {
-        recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                super.onScrollStateChanged(recyclerView, newState)
-                if (newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL) {
-                    keyboardManager.hideSoftInputFromWindow(recyclerView.windowToken, 0)
-                }
-            }
-        })
+//        recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+//            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+//                super.onScrollStateChanged(recyclerView, newState)
+//                if (newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL) {
+//                    keyboardManager.hideSoftInputFromWindow(recyclerView.windowToken, 0)
+//                }
+//            }
+//        })
         this.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
             override fun onItemRangeMoved(fromPosition: Int, toPosition: Int, itemCount: Int) {
                 super.onItemRangeMoved(fromPosition, toPosition, itemCount)
@@ -73,9 +73,12 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
                         R.layout.item_country_rate,
                         parent,
                         false
-                    ),
-                    onBaseCountryChangeListener
-                )
+                    )
+
+                ) { iso, currentAmount ->
+                    (itemData[0] as ItemData.HeadData).input = currentAmount
+                    onBaseCountryChangeListener?.invoke(iso)
+                }
             }
             else -> throw Exception("NO SUPPORT THIS VIEW TYPE")
         }
@@ -110,7 +113,7 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
         data.forEach {
             val input = if (this.itemData.isNotEmpty()) (this.itemData[0] as ItemData.HeadData).input else ""
             if (newItemData.isEmpty()) newItemData.add(ItemData.HeadData(it, input))
-            else newItemData.add(ItemData.BodyData(it))
+            else newItemData.add(ItemData.BodyData(it , it.amount.toPlainString().removeAmountLastZero()))
         }
         return newItemData
     }
@@ -149,12 +152,17 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
                     setEditAble(editAmount)
                     true
                 }
+                editAmount.setOnFocusChangeListener { view, focus ->
+                    if(!focus){
+                        keyboardManager.hideSoftInputFromWindow(view.windowToken, 0)
+                    }
+                }
                 editAmount.setText(data.input)
                 editAmount.setSelection(editAmount.text.toString().length)
                 editAmount.addTextChangedListener(object : TextWatcher {
                     override fun afterTextChanged(text: Editable?) {
                         text?.let {
-                            val cleanAmount = text.toString().replace(",.".toRegex(), "")
+                            val cleanAmount = text.toString().replace("[,.]".toRegex(), "")
                             onAmountChangeListener?.invoke(if (cleanAmount.isEmpty()) 0.0 else cleanAmount.toDouble())
                             onEditTextChangeListener.invoke(data.copy(input = it.toString()))
                         }
@@ -183,21 +191,21 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
 
         data class BodyViewHolder(
             val view: View,
-            val onBaseCountryChangeListener: ((iso: String) -> Unit)?
+            val onBaseCountryChangeListener: ((iso: String , currentAmount : String) -> Unit)?
         ) : BaseViewHolder(view) {
-            override fun render(data: ItemData) {
+            fun render(data: ItemData.BodyData) {
                 super.render(data)
                 editAmount.isEnabled = false
                 imgFlag.isEnabled = false
                 tvRate.isEnabled = false
                 tvCountryName.isEnabled = false
-                val amount = if(data.countryExchangeRate.amount.toDouble() == 0.0) "" else{
-                    String.format(data.countryExchangeRate.amount.toString())
+                val amount = if(data.print.toDouble() == 0.0) "" else{
+                    String.format(data.print)
                 }
                 editAmount.setText(amount)
                 editAmount.setSelection(editAmount.length())
                 clBackground.setOnClickListener {
-                    onBaseCountryChangeListener?.invoke(data.countryExchangeRate.iso)
+                    onBaseCountryChangeListener?.invoke(data.countryExchangeRate.iso , editAmount.text.toString())
                 }
             }
         }

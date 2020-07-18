@@ -1,8 +1,6 @@
 package com.rakuten.assignment.activity.main
 
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.rakuten.assignment.R
 import com.rakuten.assignment.activity.BaseActivity
@@ -50,7 +48,7 @@ class MainActivity : BaseActivity(), MainContract.View {
         setCallBackListener()
     }
 
-    private fun setCallBackListener(){
+    private fun setCallBackListener() {
         exchangeRatesAdapter.setOnAmountChangeListener {
             presenter.setAmount(it)
         }
