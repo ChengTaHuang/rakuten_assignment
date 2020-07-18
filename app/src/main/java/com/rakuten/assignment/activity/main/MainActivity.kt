@@ -13,7 +13,7 @@ import org.koin.core.parameter.parametersOf
 class MainActivity : BaseActivity(), MainContract.View {
 
     private val presenter: MainContract.Presenter  by inject { parametersOf(this) }
-    private val exchangeRatesAdapter: ExchangeRatesAdapter = ExchangeRatesAdapter()
+    private val exchangeRatesAdapter: ExchangeRatesAdapter by lazy { ExchangeRatesAdapter(rvContent) }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
