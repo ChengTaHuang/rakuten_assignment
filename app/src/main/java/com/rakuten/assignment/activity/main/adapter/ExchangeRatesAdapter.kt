@@ -187,7 +187,10 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
             override fun render(data: ItemData) {
                 super.render(data)
                 editAmount.isEnabled = false
-                editAmount.setText(data.countryExchangeRate.amount.toString())
+                val amount = if(data.countryExchangeRate.amount.toDouble() == 0.0) "" else{
+                    String.format(data.countryExchangeRate.amount.toString())
+                }
+                editAmount.setText(amount)
                 editAmount.setSelection(editAmount.length())
                 clBackground.setOnClickListener {
                     onBaseCountryChangeListener?.invoke(data.countryExchangeRate.iso)
