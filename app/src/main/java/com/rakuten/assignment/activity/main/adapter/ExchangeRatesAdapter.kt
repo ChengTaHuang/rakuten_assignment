@@ -2,11 +2,8 @@ package com.rakuten.assignment.activity.main.adapter
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.aldoapps.autoformatedittext.AutoFormatEditText
 import com.mynameismidori.currencypicker.ExtendedCurrency
 import com.rakuten.assignment.bean.CountryExchangeRate
+import com.rakuten.assignment.utils.removeAmountLastZero
 
 
 class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
@@ -121,6 +119,7 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
         private val tvRate by lazy { itemView.findViewById<AppCompatTextView>(com.rakuten.assignment.R.id.tvRate) }
         private val tvCountryName by lazy { itemView.findViewById<AppCompatTextView>(com.rakuten.assignment.R.id.tvCountryName) }
         protected val editAmount by lazy { itemView.findViewById<AutoFormatEditText>(com.rakuten.assignment.R.id.editAmount) }
+        protected val clBackground by lazy { itemView.findViewById<ConstraintLayout>(com.rakuten.assignment.R.id.clBackground) }
         protected val keyboardManager: InputMethodManager by lazy {
             itemView.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         }
@@ -130,9 +129,9 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
             imgFlag.setImageResource(currency.flag)
             tvRate.text = itemView.context.getString(
                 com.rakuten.assignment.R.string.exchange_rate_label,
-                data.countryExchangeRate.iso,
-                data.countryExchangeRate.baseRate,
-                data.countryExchangeRate.base
+                data.countryExchangeRate.base,
+                data.countryExchangeRate.rate.toString().removeAmountLastZero(),
+                data.countryExchangeRate.iso
             )
             tvCountryName.text = data.countryExchangeRate.iso
         }
@@ -142,7 +141,6 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
             val onEditTextChangeListener: ((ItemData.HeadData) -> Unit),
             val onAmountChangeListener: ((Double) -> Unit)?
         ) : BaseViewHolder(view) {
-            protected val clBackground by lazy { itemView.findViewById<ConstraintLayout>(com.rakuten.assignment.R.id.clBackground) }
             @SuppressLint("ClickableViewAccessibility")
             fun render(data: ItemData.HeadData) {
                 super.render(data)
@@ -186,7 +184,6 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
             val view: View,
             val onBaseCountryChangeListener: ((iso: String) -> Unit)?
         ) : BaseViewHolder(view) {
-            protected val clBackground by lazy { itemView.findViewById<ConstraintLayout>(com.rakuten.assignment.R.id.clBackground) }
             override fun render(data: ItemData) {
                 super.render(data)
                 editAmount.isEnabled = false

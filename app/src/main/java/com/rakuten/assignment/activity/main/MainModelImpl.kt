@@ -5,6 +5,7 @@ import com.rakuten.assignment.bean.CountryExchangeRate
 import com.rakuten.assignment.bean.ExchangeRatesResponse
 import io.reactivex.Single
 import java.math.BigDecimal
+import java.math.RoundingMode
 
 class MainModelImpl(private val repo: MainRepository) : BaseModelImpl(),
     MainContract.Model {
@@ -29,11 +30,20 @@ class MainModelImpl(private val repo: MainRepository) : BaseModelImpl(),
     override fun changeBaseCountry(iso: String): Single<List<CountryExchangeRate>> {
         val update = mutableListOf<CountryExchangeRate>()
         val countryExchangeRate = countryExchangeRates.find { it.iso == iso }!!
-        update.add(countryExchangeRate.copy(base = iso))
+        update.add(countryExchangeRate.copy(base = iso, rate = 1.0))
         countryExchangeRates
             .filter { it.iso != countryExchangeRate.iso }
             .forEach {
-                update.add(CountryExchangeRate(it.iso, it.rate, it.amount, countryExchangeRate.iso))
+                update.add(
+                    CountryExchangeRate(
+                        it.iso,
+                        BigDecimal(it.rate.toString()).divide(
+                            BigDecimal(countryExchangeRate.rate.toString()),
+                            4,
+                            RoundingMode.FLOOR
+                        ).toDouble(), it.amount, countryExchangeRate.iso
+                    )
+                )
             }
         countryExchangeRates = update
         return Single.just(countryExchangeRates)
