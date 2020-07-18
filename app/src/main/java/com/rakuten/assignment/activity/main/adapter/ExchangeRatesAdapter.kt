@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -104,6 +105,9 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
 
     private fun convertToItemData(data: List<CountryExchangeRate>, maximumNumberOfDigital: Int): MutableList<ItemData> {
         val newItemData = mutableListOf<ItemData>()
+        val test = data.maxBy {
+            it.amount.toPlainString().removeAmountLastZero().replace("[,.]".toRegex(), "").length
+        }
         val maxAmountLength = data.maxBy {
             it.amount.toPlainString().removeAmountLastZero().replace("[,.]".toRegex(), "").length
         }?.amount?.toPlainString()?.removeAmountLastZero()?.replace("[,.]".toRegex(), "")?.length ?: 0
@@ -111,7 +115,8 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
         data.forEach {
             if (newItemData.isEmpty()) {
                 val input = if (this.itemData.isNotEmpty()) (this.itemData[0] as ItemData.HeadData).input else ""
-                val isFit = (input.length >= maximumNumberOfDigital || maxAmountLength >= maximumNumberOfDigital)
+                val onlyDigitalInput = input.replace("[,.]".toRegex(), "").length
+                val isFit = (onlyDigitalInput >= maximumNumberOfDigital || maxAmountLength >= maximumNumberOfDigital)
                 newItemData.add(ItemData.HeadData(it, input, isFit))
             } else newItemData.add(ItemData.BodyData(it, it.amount.toPlainString().removeAmountLastZero()))
         }
@@ -158,7 +163,7 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
                         keyboardManager.hideSoftInputFromWindow(view.windowToken, 0)
                     }
                 }
-                if (data.isAmountFitEditText) editAmount.setNotAllowInput()
+                editAmount.setAllowInput(!data.isAmountFitEditText)
                 editAmount.setText(data.input)
                 editAmount.setSelection(editAmount.text.toString().length)
                 editAmount.addTextChangedListener(object : TextWatcher {

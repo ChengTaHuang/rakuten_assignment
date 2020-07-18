@@ -46,8 +46,9 @@ public class AutoFormatEditText extends AppCompatEditText {
         setFilters(inputFilterArray);
     }
 
-    public void setNotAllowInput() {
-        int maxLength = this.getText().toString().length();
+    public void setAllowInput(Boolean allowInput) {
+        int maxLength = MAX_LENGTH;
+        if(!allowInput) maxLength = this.getText().toString().length();
         InputFilter[] inputFilterArray = new InputFilter[1];
         inputFilterArray[0] = new InputFilter.LengthFilter(maxLength);
         setFilters(inputFilterArray);
