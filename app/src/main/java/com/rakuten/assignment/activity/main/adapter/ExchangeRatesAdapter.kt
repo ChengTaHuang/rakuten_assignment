@@ -45,7 +45,7 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
             typeHead -> {
                 BaseViewHolder.HeadViewHolder(
                     inflater.inflate(
-                        R.layout.item_country_rate,
+                        R.layout.item_country_rate_head,
                         parent,
                         false
                     ),
@@ -58,7 +58,7 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
             typeBody -> {
                 BaseViewHolder.BodyViewHolder(
                     inflater.inflate(
-                        R.layout.item_country_rate,
+                        R.layout.item_country_rate_body,
                         parent,
                         false
                     ),
