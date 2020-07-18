@@ -1,9 +1,11 @@
 package com.rakuten.assignment.activity.main
 
+import android.util.Log
 import com.rakuten.assignment.base.BaseModelImpl
 import com.rakuten.assignment.bean.CountryExchangeRate
 import com.rakuten.assignment.bean.ExchangeRatesResponse
 import io.reactivex.Single
+import java.math.BigDecimal
 
 class MainModelImpl(private val repo: MainRepository) : BaseModelImpl(),
     MainContract.Model {
@@ -27,9 +29,9 @@ class MainModelImpl(private val repo: MainRepository) : BaseModelImpl(),
 
     private fun addExchangeData(rates: Map<String, Double>, base: String): List<CountryExchangeRate> {
         val countryExchangeRates = mutableListOf<CountryExchangeRate>()
-        countryExchangeRates.add(CountryExchangeRate(base, 1.0, 0.0, base))
+        countryExchangeRates.add(CountryExchangeRate(base, 1.0, BigDecimal(0.0), base))
         for ((iso, rate) in rates) {
-            countryExchangeRates.add(CountryExchangeRate(iso, rate, 0.0, base))
+            countryExchangeRates.add(CountryExchangeRate(iso, rate, BigDecimal(0.0), base))
         }
         return countryExchangeRates.toList()
     }
@@ -54,9 +56,14 @@ class MainModelImpl(private val repo: MainRepository) : BaseModelImpl(),
     override fun setAmount(amount: Double): Single<List<CountryExchangeRate>> {
         val update = mutableListOf<CountryExchangeRate>()
         countryExchangeRates.forEach {
-            update.add(CountryExchangeRate(it.iso , it.rate , amount * it.rate , it.base))
+            update.add(CountryExchangeRate(it.iso , it.rate , calAmount(amount , it.rate) , it.base))
         }
         countryExchangeRates = update
         return Single.just(countryExchangeRates)
+    }
+
+    private fun calAmount(amount: Double , rate : Double) : BigDecimal{
+        val value = BigDecimal(amount * rate)
+        return value.setScale(4,BigDecimal.ROUND_DOWN)
     }
 }
