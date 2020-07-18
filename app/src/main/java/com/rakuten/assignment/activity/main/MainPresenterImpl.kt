@@ -15,6 +15,7 @@ class MainPresenterImpl(
             .flatMap {
                 model.convertToCountryExchangeRate(it)
             }
+            .subscribeOn(Schedulers.computation())
             .doAfterSuccess {
                 view.showUpdateTime(model.getCurrentTime())
             }
@@ -32,7 +33,7 @@ class MainPresenterImpl(
 
     override fun setBaseCountry(iso: String) {
         model.changeBaseCountry(iso)
-            .subscribeOn(AndroidSchedulers.mainThread())
+            .subscribeOn(Schedulers.computation())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
                 view.showExchangeRates(it)
@@ -43,7 +44,7 @@ class MainPresenterImpl(
 
     override fun setAmount(amount: Double) {
         model.setAmount(amount)
-            .subscribeOn(AndroidSchedulers.mainThread())
+            .subscribeOn(Schedulers.computation())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
                 view.showExchangeRates(it)
