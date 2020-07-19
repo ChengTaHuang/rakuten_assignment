@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -68,12 +67,11 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
                         R.layout.item_country_rate_body,
                         parent,
                         false
-                    ),
-                    {
-
-                    },
-                    onBaseCountryChangeListener
-                )
+                    )
+                ) {
+                    (itemData[0] as ItemData.HeadData).input = ""
+                    onBaseCountryChangeListener?.invoke(it)
+                }
             }
             else -> throw Exception("NO SUPPORT THIS VIEW TYPE")
         }
@@ -198,7 +196,6 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
 
         data class BodyViewHolder(
             val view: View,
-            val onIsFitAmountEditTextListener: ((Boolean) -> Unit),
             val onBaseCountryChangeListener: ((iso: String) -> Unit)?
         ) : BaseViewHolder(view) {
             fun render(data: ItemData.BodyData) {
@@ -226,7 +223,7 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
         }
 
         override fun areContentsTheSame(oldItem: ItemData, newItem: ItemData): Boolean {
-            if(oldItem is ItemData.HeadData && newItem is ItemData.HeadData){
+            if (oldItem is ItemData.HeadData && newItem is ItemData.HeadData) {
                 return oldItem.input == newItem.input && oldItem.countryExchangeRate == newItem.countryExchangeRate
             } else return oldItem.countryExchangeRate == newItem.countryExchangeRate
         }

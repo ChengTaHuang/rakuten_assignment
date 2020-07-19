@@ -1,6 +1,5 @@
 package com.rakuten.assignment.activity.main
 
-import android.util.Log
 import com.rakuten.assignment.base.BaseModelImpl
 import com.rakuten.assignment.bean.CountryExchangeRate
 import com.rakuten.assignment.bean.ExchangeRatesResponse
@@ -41,7 +40,7 @@ class MainModelImpl(private val repo: MainRepository) : BaseModelImpl(),
                         it.iso,
                         it.exchangeEUR,
                         newRate,
-                        it.amount,
+                        BigDecimal(0.0.toString()),
                         countryExchangeRate.iso
                     )
                 )
