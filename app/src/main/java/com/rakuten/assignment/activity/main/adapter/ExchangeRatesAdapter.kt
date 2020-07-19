@@ -105,9 +105,6 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
 
     private fun convertToItemData(data: List<CountryExchangeRate>, maximumNumberOfDigital: Int): MutableList<ItemData> {
         val newItemData = mutableListOf<ItemData>()
-        val test = data.maxBy {
-            it.amount.toPlainString().removeAmountLastZero().replace("[,.]".toRegex(), "").length
-        }
         val maxAmountLength = data.maxBy {
             it.amount.toPlainString().removeAmountLastZero().replace("[,.]".toRegex(), "").length
         }?.amount?.toPlainString()?.removeAmountLastZero()?.replace("[,.]".toRegex(), "")?.length ?: 0
@@ -166,7 +163,7 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
                 editAmount.setAllowInput(!data.isAmountFitEditText)
                 editAmount.setText(data.input)
                 editAmount.setSelection(editAmount.text.toString().length)
-                editAmount.addTextChangedListener(object : TextWatcher {
+                val textWatcher = object : TextWatcher {
                     override fun afterTextChanged(text: Editable?) {
                         text?.let {
                             val cleanAmount = text.toString().replace("[,.]".toRegex(), "")
@@ -174,7 +171,6 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
                             onAmountChangeListener?.invoke(if (cleanAmount.isEmpty()) "0.0" else withOutCommaAmount)
                             onEditTextChangeListener.invoke(data.copy(input = it.toString()))
                             editAmount.removeTextChangedListener(this)
-
                         }
                     }
 
@@ -183,8 +179,10 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
 
                     override fun onTextChanged(text: CharSequence?, p1: Int, p2: Int, p3: Int) {
                     }
+                }
 
-                })
+                editAmount.addTextChangedListener(textWatcher)
+                editAmount.tag = textWatcher
                 onIsFitAmountEditTextListener.invoke(editAmount.howManyNumberCanItPut())
                 clBackground.setOnClickListener {
                     setEditAble(editAmount)
@@ -228,7 +226,9 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
         }
 
         override fun areContentsTheSame(oldItem: ItemData, newItem: ItemData): Boolean {
-            return oldItem.countryExchangeRate == newItem.countryExchangeRate
+            if(oldItem is ItemData.HeadData && newItem is ItemData.HeadData){
+                return oldItem.input == newItem.input && oldItem.countryExchangeRate == newItem.countryExchangeRate
+            } else return oldItem.countryExchangeRate == newItem.countryExchangeRate
         }
     }
 }
