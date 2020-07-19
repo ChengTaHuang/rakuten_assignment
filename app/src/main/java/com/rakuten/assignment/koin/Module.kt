@@ -18,11 +18,8 @@ val appModule = module {
     factory<MainContract.Presenter> { (view: MainContract.View) ->
         MainPresenterImpl(get(), view)
     }
-    single<SplashRepository> {
-        SplashRepositoryImpl(get())
-    }
     factory<SplashContract.Model> {
-        SplashModelImpl(get())
+        SplashModelImpl()
     }
     factory<SplashContract.Presenter> { (view: SplashContract.View) ->
         SplashPresenterImpl(get(), view)

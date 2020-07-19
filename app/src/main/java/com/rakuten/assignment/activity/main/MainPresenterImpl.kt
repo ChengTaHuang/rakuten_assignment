@@ -1,5 +1,6 @@
 package com.rakuten.assignment.activity.main
 
+import android.util.Log
 import com.rakuten.assignment.rxjava.bind
 import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -17,6 +18,7 @@ class MainPresenterImpl(
         timerListener({
             view.showTimeLeft(it)
         } , {
+            Log.i("check", "call")
             model.getExchangeRate()
                 .subscribeOn(Schedulers.io())
                 .flatMap {
@@ -62,7 +64,6 @@ class MainPresenterImpl(
     }
 
     private fun timerListener(second : (Int) -> Unit , callBack : () -> Unit){
-        callBack()
         timerDisposable.clear()
         timerDisposable.add(Flowable.interval(0, 1, TimeUnit.SECONDS)
             .onBackpressureDrop()

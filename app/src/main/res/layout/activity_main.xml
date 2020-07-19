@@ -27,6 +27,17 @@
 
     </View>
 
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/imgIcon"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="10dp"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintBottom_toBottomOf="@+id/viewTitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/viewTitle"
+        app:srcCompat="@drawable/ic_exchange_rate" />
+
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/tvUpdateTime"
         android:layout_width="wrap_content"
@@ -54,6 +65,8 @@
         android:id="@+id/rvContent"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:overScrollMode="never"
+        android:scrollbars="none"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

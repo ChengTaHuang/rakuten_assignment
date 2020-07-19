@@ -1,7 +1,10 @@
 package com.rakuten.assignment.activity.main
 
+import android.content.Intent
+import android.content.Intent.getIntent
 import android.os.Bundle
 import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.rakuten.assignment.R
 import com.rakuten.assignment.activity.BaseActivity
@@ -67,6 +70,12 @@ class MainActivity : BaseActivity(), MainContract.View {
         }
         exchangeRatesAdapter.setOnBaseCountryChangeListener {
             presenter.setBaseCountry(it)
+        }
+    }
+
+    companion object{
+        fun startActivity(activity: BaseActivity) {
+            activity.startActivity(Intent(activity , MainActivity::class.java))
         }
     }
 }
