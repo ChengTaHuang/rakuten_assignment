@@ -14,9 +14,7 @@ class MainPresenterImpl(
     private val timerDisposable = CompositeDisposable()
 
     override fun startGettingExchangeRates() {
-        timerListener({
-            view.showTimeLeft(it)
-        } , {
+        timerListener {
             model.isNetworkConnected()
                 .flatMap { isConnected ->
                     if(isConnected) model.getExchangeRate()
@@ -42,7 +40,7 @@ class MainPresenterImpl(
                         view.showError()
                     }
                 }).bind(view)
-        })
+        }
     }
 
     override fun stopGettingExchangeRates() {
@@ -71,17 +69,14 @@ class MainPresenterImpl(
             }).bind(view)
     }
 
-    private fun timerListener(second : (Int) -> Unit , callBack : () -> Unit){
+    private fun timerListener(callBack : () -> Unit){
         timerDisposable.clear()
-        timerDisposable.add(Flowable.interval(0, 1, TimeUnit.SECONDS)
+        timerDisposable.add(Flowable.interval(0, 10, TimeUnit.SECONDS)
             .onBackpressureDrop()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe {
-                if(it.toInt() % 10 == 0){
-                    callBack()
-                }
-                second(it.toInt() % 10)
+                callBack()
             })
     }
 

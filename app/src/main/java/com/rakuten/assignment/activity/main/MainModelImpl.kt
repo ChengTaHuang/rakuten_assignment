@@ -1,10 +1,5 @@
 package com.rakuten.assignment.activity.main
 
-import android.content.Context
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
-import android.os.Build
-import android.util.Log
 import com.rakuten.assignment.base.BaseModelImpl
 import com.rakuten.assignment.bean.CountryExchangeRate
 import com.rakuten.assignment.bean.ExchangeRatesResponse
@@ -17,20 +12,22 @@ import java.util.*
 class MainModelImpl(private val repo: MainRepository) : BaseModelImpl(),
     MainContract.Model {
     private var countryExchangeRates = mutableListOf<CountryExchangeRate>()
+    private var currentAmount: String = "0"
 
     override fun isNetworkConnected(): Single<Boolean> {
         return repo.isNetworkConnected()
     }
 
     override fun getExchangeRate(): Single<ExchangeRatesResponse> {
-        return  repo.getExchangeRate()
+        return repo.getExchangeRate()
     }
 
+    //if countryExchangeRates is empty , give it new data , else recalculate amount with new rate
     override fun convertToCountryExchangeRate(data: ExchangeRatesResponse): Single<List<CountryExchangeRate>> {
         if (countryExchangeRates.isEmpty()) {
             countryExchangeRates.addAll(addExchangeData(data.rates, data.base))
         } else {
-            updateExchangeRate(data.rates, countryExchangeRates)
+            countryExchangeRates = updateExchangeRate(data.rates, currentAmount)
         }
         return Single.just(countryExchangeRates)
     }
@@ -62,6 +59,7 @@ class MainModelImpl(private val repo: MainRepository) : BaseModelImpl(),
     }
 
     override fun setAmount(amount: String): Single<List<CountryExchangeRate>> {
+        this.currentAmount = amount
         val update = mutableListOf<CountryExchangeRate>()
         countryExchangeRates.forEach {
             update.add(CountryExchangeRate(it.iso, it.exchangeEUR, it.rate, calAmount(amount, it.rate), it.base))
@@ -75,7 +73,7 @@ class MainModelImpl(private val repo: MainRepository) : BaseModelImpl(),
         countryExchangeRates.add(
             CountryExchangeRate(
                 base,
-                1.0,
+                1.00,
                 BigDecimal(1.0.toString()),
                 BigDecimal(0.0.toString()),
                 base
@@ -95,8 +93,23 @@ class MainModelImpl(private val repo: MainRepository) : BaseModelImpl(),
         return countryExchangeRates.toList()
     }
 
-    private fun updateExchangeRate(rates: Map<String, Double>, countryExchangeRates: MutableList<CountryExchangeRate>) {
-
+    private fun updateExchangeRate(rates: Map<String, Double>, amount: String): MutableList<CountryExchangeRate> {
+        val update = mutableListOf<CountryExchangeRate>()
+        val baseCountryExchangeRates = countryExchangeRates[0]
+        countryExchangeRates.forEach {
+            val exchangeEUR = if (rates[it.iso] == null) 1.0 else rates[it.iso]!!
+            val newRate = calNewExchangeRate(exchangeEUR, baseCountryExchangeRates.exchangeEUR)
+            update.add(
+                CountryExchangeRate(
+                    it.iso,
+                    exchangeEUR,
+                    newRate,
+                    calAmount(amount, newRate),
+                    it.base
+                )
+            )
+        }
+        return update
     }
 
     private fun calAmount(amount: String, rate: BigDecimal): BigDecimal {
@@ -108,25 +121,4 @@ class MainModelImpl(private val repo: MainRepository) : BaseModelImpl(),
         return BigDecimal(countryRate)
             .divide(BigDecimal(EURRate.toString()), 4, RoundingMode.HALF_UP)
     }
-
-    val Context.isConnected: Boolean
-        get() {
-            val connectivityManager = this.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-            return when {
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.M -> {
-                    val nw = connectivityManager.activeNetwork ?: return false
-                    val actNw = connectivityManager.getNetworkCapabilities(nw) ?: return false
-                    when {
-                        actNw.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
-                        actNw.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
-                        else -> false
-                    }
-                }
-                else -> {
-                    // Use depreciated methods only on older devices
-                    val nwInfo = connectivityManager.activeNetworkInfo ?: return false
-                    nwInfo.isConnected
-                }
-            }
-        }
 }
