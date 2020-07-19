@@ -93,6 +93,10 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
         }
     }
 
+    override fun getItemViewType(position: Int): Int {
+        return position
+    }
+
     fun update(data: List<CountryExchangeRate>) {
         itemData = convertToItemData(data, maximumAmountOfDigital)
         submitList(itemData.toMutableList())
