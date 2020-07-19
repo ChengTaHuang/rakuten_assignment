@@ -8,3 +8,7 @@ fun String.removeAmountLastZero(): String {
     }
     return amount
 }
+
+fun String.removeCommaAndDot(): String {
+    return this.replace("[,.]".toRegex(), "")
+}

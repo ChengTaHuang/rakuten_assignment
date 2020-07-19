@@ -6,7 +6,7 @@ import java.util.*
 
 object TimeFormat {
     @SuppressLint("SimpleDateFormat")
-    private var format = SimpleDateFormat("dd-MM-yyyy hh:mm:ss" , Locale.ENGLISH)
+    private var format = SimpleDateFormat("dd-MM-yyyy HH:mm:ss")
 
     fun time(date : Date) : String{
         return format.format(date)

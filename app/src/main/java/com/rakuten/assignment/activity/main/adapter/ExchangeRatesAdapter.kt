@@ -21,21 +21,21 @@ import com.mynameismidori.currencypicker.ExtendedCurrency
 import com.rakuten.assignment.R
 import com.rakuten.assignment.bean.CountryExchangeRate
 import com.rakuten.assignment.custom.MoneyFormatEditText
-import com.rakuten.assignment.utils.howManyNumberCanItPut
+import com.rakuten.assignment.utils.maximumAmountOfDigital
 import com.rakuten.assignment.utils.removeAmountLastZero
+import com.rakuten.assignment.utils.removeCommaAndDot
 
 
 class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
     ListAdapter<ItemData, ExchangeRatesAdapter.BaseViewHolder>(TaskDiffCallback()) {
-    private val typeHead = 0
-    private val typeBody = 1
     private var onAmountChangeListener: ((String) -> Unit)? = null
     private var onBaseCountryChangeListener: ((iso: String) -> Unit)? = null
-    private var onIsFitAmountEditTextListener: ((Boolean) -> Unit)? = null
     private var itemData = mutableListOf<ItemData>()
-    private var maximumNumberOfDigital = Int.MAX_VALUE
+    //the amount digital of every each item
+    private var maximumAmountOfDigital = Int.MAX_VALUE
 
     init {
+        //after base country is changed , recyclerview will scroll to the top
         this.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
             override fun onItemRangeMoved(fromPosition: Int, toPosition: Int, itemCount: Int) {
                 super.onItemRangeMoved(fromPosition, toPosition, itemCount)
@@ -46,34 +46,41 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        return when (viewType) {
-            typeHead -> {
+        return when (getItem(viewType)) {
+            is ItemData.HeadData -> {
+                val onEditTextChangeListener: ((ItemData.HeadData) -> Unit) = {
+                    itemData[0] = it
+                }
+                val onMaximumNumberOfDigitalListener: ((Int) -> Unit) = {
+                    if (it in 1 until maximumAmountOfDigital) maximumAmountOfDigital = it
+                }
+
                 BaseViewHolder.HeadViewHolder(
                     inflater.inflate(
                         R.layout.item_country_rate_head,
                         parent,
                         false
                     ),
-                    {
-                        itemData[0] = it
-                    },
-                    {
-                        if (it in 1 until maximumNumberOfDigital) maximumNumberOfDigital = it
-                    },
+                    onEditTextChangeListener,
+                    onMaximumNumberOfDigitalListener,
                     onAmountChangeListener
                 )
             }
-            typeBody -> {
+            is ItemData.BodyData -> {
+                val onBaseCountryChangeListener: ((iso: String) -> Unit) = {
+                    //reset input amount to empty
+                    (itemData[0] as ItemData.HeadData).inputAmount = ""
+                    onBaseCountryChangeListener?.invoke(it)
+                }
+
                 BaseViewHolder.BodyViewHolder(
                     inflater.inflate(
                         R.layout.item_country_rate_body,
                         parent,
                         false
-                    )
-                ) {
-                    (itemData[0] as ItemData.HeadData).input = ""
-                    onBaseCountryChangeListener?.invoke(it)
-                }
+                    ),
+                    onBaseCountryChangeListener
+                )
             }
             else -> throw Exception("NO SUPPORT THIS VIEW TYPE")
         }
@@ -86,12 +93,8 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
         }
     }
 
-    override fun getItemViewType(position: Int): Int {
-        return if (position == typeHead) typeHead else typeBody
-    }
-
     fun update(data: List<CountryExchangeRate>) {
-        itemData = convertToItemData(data, maximumNumberOfDigital)
+        itemData = convertToItemData(data, maximumAmountOfDigital)
         submitList(itemData.toMutableList())
     }
 
@@ -105,32 +108,43 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
 
     private fun convertToItemData(data: List<CountryExchangeRate>, maximumNumberOfDigital: Int): MutableList<ItemData> {
         val newItemData = mutableListOf<ItemData>()
-        val maxAmountLength = data.maxBy {
-            it.amount.toPlainString().removeAmountLastZero().replace("[,.]".toRegex(), "").length
-        }?.amount?.toPlainString()?.removeAmountLastZero()?.replace("[,.]".toRegex(), "")?.length ?: 0
+        val maximumDigitalOfCurrencyLength = data.maxBy {
+            it.amount.toPlainString().removeAmountLastZero().removeCommaAndDot().length
+        }?.amount?.toPlainString()?.removeAmountLastZero()?.removeCommaAndDot()?.length ?: 0
 
-        data.forEach {
+        data.forEach { countryExchangeRate ->
             if (newItemData.isEmpty()) {
-                val input = if (this.itemData.isNotEmpty()) (this.itemData[0] as ItemData.HeadData).input else ""
-                val onlyDigitalInput = input.replace("[,.]".toRegex(), "").length
-                val isFit = (onlyDigitalInput >= maximumNumberOfDigital || maxAmountLength >= maximumNumberOfDigital)
-                newItemData.add(ItemData.HeadData(it, input, isFit))
-            } else newItemData.add(ItemData.BodyData(it, it.amount.toPlainString().removeAmountLastZero()))
+                //if it's first time convert to item data input amount will be empty else use the last input amount
+                val inputAmount =
+                    if (this.itemData.isNotEmpty()) (this.itemData[0] as ItemData.HeadData).inputAmount else ""
+                //remove all comma and dot by input amount
+                val onlyDigitalInputAmount = inputAmount.removeCommaAndDot().length
+
+                val isAlreadyFitEditText =
+                    (onlyDigitalInputAmount >= maximumNumberOfDigital || maximumDigitalOfCurrencyLength >= maximumNumberOfDigital)
+
+                newItemData.add(ItemData.HeadData(countryExchangeRate, inputAmount, isAlreadyFitEditText))
+            } else newItemData.add(
+                ItemData.BodyData(
+                    countryExchangeRate,
+                    countryExchangeRate.amount.toPlainString().removeAmountLastZero()
+                )
+            )
         }
         return newItemData
     }
 
     sealed class BaseViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        protected val imgFlag by lazy { itemView.findViewById<AppCompatImageView>(R.id.imgFlag) }
-        protected val tvRate by lazy { itemView.findViewById<AppCompatTextView>(R.id.tvRate) }
-        protected val tvCountryName by lazy { itemView.findViewById<AppCompatTextView>(R.id.tvCountryName) }
-        protected val editAmount by lazy { itemView.findViewById<MoneyFormatEditText>(R.id.editAmount) }
-        protected val clBackground by lazy { itemView.findViewById<ConstraintLayout>(R.id.clBackground) }
+        protected val imgFlag: AppCompatImageView by lazy { itemView.findViewById<AppCompatImageView>(R.id.imgFlag) }
+        protected val tvRate: AppCompatTextView by lazy { itemView.findViewById<AppCompatTextView>(R.id.tvRate) }
+        protected val tvCountryName: AppCompatTextView by lazy { itemView.findViewById<AppCompatTextView>(R.id.tvCountryName) }
+        protected val editAmount: MoneyFormatEditText by lazy { itemView.findViewById<MoneyFormatEditText>(R.id.editAmount) }
+        protected val clBackground: ConstraintLayout by lazy { itemView.findViewById<ConstraintLayout>(R.id.clBackground) }
         protected val keyboardManager: InputMethodManager by lazy {
             itemView.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         }
 
-        open fun render(data: ItemData) {
+        protected fun render(data: ItemData) {
             val currency = ExtendedCurrency.getCurrencyByISO(data.countryExchangeRate.iso)
             imgFlag.setImageResource(currency.flag)
             tvRate.text = itemView.context.getString(
@@ -145,7 +159,7 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
         data class HeadViewHolder(
             val view: View,
             val onEditTextChangeListener: ((ItemData.HeadData) -> Unit),
-            val onIsFitAmountEditTextListener: ((Int) -> Unit),
+            val onMaximumAmountOfDigitalListener: ((Int) -> Unit),
             val onAmountChangeListener: ((String) -> Unit)?
         ) : BaseViewHolder(view) {
             @SuppressLint("ClickableViewAccessibility")
@@ -161,15 +175,15 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
                     }
                 }
                 editAmount.setAllowInput(!data.isAmountFitEditText)
-                editAmount.setText(data.input)
+                editAmount.setText(data.inputAmount)
                 editAmount.setSelection(editAmount.text.toString().length)
                 editAmount.addTextChangedListener(object : TextWatcher {
-                    override fun afterTextChanged(text: Editable?) {
-                        text?.let {
-                            val cleanAmount = text.toString().replace("[,.]".toRegex(), "")
-                            val withOutCommaAmount = text.toString().replace("[,]".toRegex(), "")
-                            onAmountChangeListener?.invoke(if (cleanAmount.isEmpty()) "0.0" else withOutCommaAmount)
-                            onEditTextChangeListener.invoke(data.copy(input = it.toString()))
+                    override fun afterTextChanged(editable: Editable?) {
+                        editable?.toString()?.let {text ->
+                            val cleanAmount = text.removeCommaAndDot()
+                            val withoutCommaAmount = text.replace("[,]".toRegex(), "")
+                            onAmountChangeListener?.invoke(if (cleanAmount.isEmpty()) "0.0" else withoutCommaAmount)
+                            onEditTextChangeListener.invoke(data.copy(inputAmount = text))
                             editAmount.removeTextChangedListener(this)
                         }
                     }
@@ -182,6 +196,7 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
                 })
                 editAmount.setOnKeyListener(object : View.OnKeyListener {
                     override fun onKey(v: View, keyCode: Int, event: KeyEvent): Boolean {
+                        //if EditText does not allow entering more numbers, it will be shake
                         if (event.action == KeyEvent.ACTION_DOWN && data.isAmountFitEditText) {
                             if (keyCode >= KeyEvent.KEYCODE_0 && keyCode <= KeyEvent.KEYCODE_9) {
                                 editAmount.startAnimation(AnimationUtils.loadAnimation(v.context, R.anim.shake))
@@ -191,7 +206,7 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
                         return false
                     }
                 })
-                onIsFitAmountEditTextListener.invoke(editAmount.howManyNumberCanItPut())
+                onMaximumAmountOfDigitalListener.invoke(editAmount.maximumAmountOfDigital())
                 clBackground.setOnClickListener {
                     setEditAble(editAmount)
                 }
@@ -215,8 +230,8 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
                 imgFlag.isEnabled = false
                 tvRate.isEnabled = false
                 tvCountryName.isEnabled = false
-                val amount = if (data.print.toDouble() == 0.0) "" else {
-                    String.format(data.print)
+                val amount = if (data.currency.toDouble() == 0.0) "" else {
+                    String.format(data.currency)
                 }
                 editAmount.setText(amount)
                 editAmount.setSelection(editAmount.length())
@@ -233,9 +248,9 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
         }
 
         override fun areContentsTheSame(oldItem: ItemData, newItem: ItemData): Boolean {
-            if (oldItem is ItemData.HeadData && newItem is ItemData.HeadData) {
-                return oldItem.input == newItem.input && oldItem.countryExchangeRate == newItem.countryExchangeRate
-            } else return oldItem.countryExchangeRate == newItem.countryExchangeRate
+            return if (oldItem is ItemData.HeadData && newItem is ItemData.HeadData) {
+                oldItem.inputAmount == newItem.inputAmount && oldItem.countryExchangeRate == newItem.countryExchangeRate
+            } else oldItem.countryExchangeRate == newItem.countryExchangeRate
         }
     }
 }

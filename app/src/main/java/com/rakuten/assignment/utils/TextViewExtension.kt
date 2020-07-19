@@ -7,23 +7,8 @@ import androidx.appcompat.widget.AppCompatTextView
 import java.math.BigDecimal
 import java.text.DecimalFormat
 
-fun AppCompatTextView.getTextWidth() : Int {
-    val text = text.toString()
-    val bounds = Rect()
-    val textPaint = paint
-    textPaint.getTextBounds(text, 0, text.length, bounds)
-    return bounds.width()
-}
 
-fun AppCompatEditText.isFit() : Boolean {
-    val text = text.toString() + "9"
-    val bounds = Rect()
-    val textPaint = paint
-    textPaint.getTextBounds(text, 0, text.length, bounds)
-    return bounds.width() > this.measuredWidth
-}
-
-fun AppCompatEditText.howManyNumberCanItPut() : Int{
+fun AppCompatEditText.maximumAmountOfDigital() : Int{
     val bounds = Rect()
     val formatter = DecimalFormat("###,###.####")
     val sb = StringBuffer("9")

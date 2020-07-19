@@ -1,11 +1,9 @@
 package com.rakuten.assignment.activity.main
 
 import com.rakuten.assignment.rxjava.bind
-import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
-import java.util.concurrent.TimeUnit
 
 class MainPresenterImpl(
     private val model: MainContract.Model,
@@ -17,7 +15,7 @@ class MainPresenterImpl(
         timerListener {
             model.isNetworkConnected()
                 .flatMap { isConnected ->
-                    if(isConnected) model.getExchangeRate()
+                    if (isConnected) model.getExchangeRate()
                     else throw NetworkConnectException()
                 }
                 .subscribeOn(Schedulers.io())
@@ -48,7 +46,7 @@ class MainPresenterImpl(
     }
 
     override fun setBaseCountry(iso: String) {
-        model.changeBaseCountry(iso)
+        model.changeBaseCountryAndResetAmount(iso)
             .subscribeOn(Schedulers.computation())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
@@ -59,7 +57,7 @@ class MainPresenterImpl(
     }
 
     override fun setAmount(amount: String) {
-        model.setAmount(amount)
+        model.getNewCountryExchangeRateByAmount(amount)
             .subscribeOn(Schedulers.computation())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
@@ -69,9 +67,9 @@ class MainPresenterImpl(
             }).bind(view)
     }
 
-    private fun timerListener(callBack : () -> Unit){
+    private fun timerListener(callBack: () -> Unit) {
         timerDisposable.clear()
-        timerDisposable.add(Flowable.interval(0, 10, TimeUnit.SECONDS)
+        timerDisposable.add(model.getTenSecondTimer()
             .onBackpressureDrop()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())

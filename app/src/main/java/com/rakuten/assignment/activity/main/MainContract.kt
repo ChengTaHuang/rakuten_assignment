@@ -3,6 +3,7 @@ package com.rakuten.assignment.activity.main
 import com.rakuten.assignment.base.BaseContract
 import com.rakuten.assignment.bean.CountryExchangeRate
 import com.rakuten.assignment.bean.ExchangeRatesResponse
+import io.reactivex.Flowable
 import io.reactivex.Single
 
 class MainContract {
@@ -13,11 +14,13 @@ class MainContract {
 
         fun getCurrentTime(): String
 
-        fun setAmount(amount: String) : Single<List<CountryExchangeRate>>
+        fun getNewCountryExchangeRateByAmount(amount: String) : Single<List<CountryExchangeRate>>
 
-        fun changeBaseCountry(iso : String) : Single<List<CountryExchangeRate>>
+        fun changeBaseCountryAndResetAmount(iso : String) : Single<List<CountryExchangeRate>>
 
         fun isNetworkConnected() : Single<Boolean>
+
+        fun getTenSecondTimer() : Flowable<Long>
     }
 
     interface View : BaseContract.View {
