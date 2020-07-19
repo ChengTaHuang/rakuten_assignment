@@ -22,6 +22,8 @@ class MainContract {
         fun showExchangeRates(countryExchangeRates : List<CountryExchangeRate>)
 
         fun showUpdateTime(date : String)
+
+        fun showTimeLeft(second : Int)
     }
 
     interface Presenter {

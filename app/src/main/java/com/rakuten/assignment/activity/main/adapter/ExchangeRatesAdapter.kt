@@ -20,7 +20,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.mynameismidori.currencypicker.ExtendedCurrency
 import com.rakuten.assignment.R
 import com.rakuten.assignment.bean.CountryExchangeRate
-import com.rakuten.assignment.custom.AutoFormatEditText2
 import com.rakuten.assignment.custom.MoneyFormatEditText
 import com.rakuten.assignment.utils.howManyNumberCanItPut
 import com.rakuten.assignment.utils.removeAmountLastZero

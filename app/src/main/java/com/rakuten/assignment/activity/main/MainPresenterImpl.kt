@@ -1,33 +1,42 @@
 package com.rakuten.assignment.activity.main
 
 import com.rakuten.assignment.rxjava.bind
+import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import java.util.concurrent.TimeUnit
 
 class MainPresenterImpl(
     private val model: MainContract.Model,
     private val view: MainContract.View
 ) : MainContract.Presenter {
+    private val timerDisposable = CompositeDisposable()
+
     override fun startGettingExchangeRates() {
-        model.getExchangeRate()
-            .subscribeOn(Schedulers.io())
-            .flatMap {
-                model.convertToCountryExchangeRate(it)
-            }
-            .subscribeOn(Schedulers.computation())
-            .doAfterSuccess {
-                view.showUpdateTime(model.getCurrentTime())
-            }
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({
-                view.showExchangeRates(it)
-            }, {
-                view.showError()
-            }).bind(view)
+        timerListener({
+            view.showTimeLeft(it)
+        } , {
+            model.getExchangeRate()
+                .subscribeOn(Schedulers.io())
+                .flatMap {
+                    model.convertToCountryExchangeRate(it)
+                }
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSubscribe { view.showLoading() }
+                .doFinally { view.hideLoading() }
+                .subscribe({
+                    view.showExchangeRates(it)
+                    view.showUpdateTime(model.getCurrentTime())
+                }, {
+                    view.showError()
+                }).bind(view)
+        })
     }
 
     override fun stopGettingExchangeRates() {
-
+        timerDisposable.clear()
     }
 
     override fun setBaseCountry(iso: String) {
@@ -50,5 +59,20 @@ class MainPresenterImpl(
             }, {
                 view.showError()
             }).bind(view)
+    }
+
+    private fun timerListener(second : (Int) -> Unit , callBack : () -> Unit){
+        callBack()
+        timerDisposable.clear()
+        timerDisposable.add(Flowable.interval(0, 1, TimeUnit.SECONDS)
+            .onBackpressureDrop()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe {
+                if(it.toInt() % 10 == 0){
+                    callBack()
+                }
+                second(it.toInt() % 10)
+            })
     }
 }

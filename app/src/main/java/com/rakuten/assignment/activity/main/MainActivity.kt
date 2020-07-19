@@ -1,6 +1,7 @@
 package com.rakuten.assignment.activity.main
 
 import android.os.Bundle
+import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.rakuten.assignment.R
 import com.rakuten.assignment.activity.BaseActivity
@@ -36,7 +37,19 @@ class MainActivity : BaseActivity(), MainContract.View {
     }
 
     override fun showUpdateTime(date: String) {
+        tvUpdateTime.text = getString(R.string.update_time , date)
+    }
 
+    override fun showTimeLeft(second: Int) {
+
+    }
+
+    override fun showLoading() {
+        clpbLoading.visibility = View.VISIBLE
+    }
+
+    override fun hideLoading() {
+        clpbLoading.visibility = View.INVISIBLE
     }
 
     private fun initViews() {

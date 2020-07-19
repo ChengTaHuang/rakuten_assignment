@@ -3,9 +3,11 @@ package com.rakuten.assignment.activity.main
 import com.rakuten.assignment.base.BaseModelImpl
 import com.rakuten.assignment.bean.CountryExchangeRate
 import com.rakuten.assignment.bean.ExchangeRatesResponse
+import com.rakuten.assignment.utils.TimeFormat
 import io.reactivex.Single
 import java.math.BigDecimal
 import java.math.RoundingMode
+import java.util.*
 
 class MainModelImpl(private val repo: MainRepository) : BaseModelImpl(),
     MainContract.Model {
@@ -24,7 +26,7 @@ class MainModelImpl(private val repo: MainRepository) : BaseModelImpl(),
     }
 
     override fun getCurrentTime(): String {
-        return System.currentTimeMillis().toString()
+        return TimeFormat.time(Date(System.currentTimeMillis()))
     }
 
     override fun changeBaseCountry(iso: String): Single<List<CountryExchangeRate>> {
