@@ -32,8 +32,8 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_margin="10dp"
-        app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintBottom_toBottomOf="@+id/viewTitle"
+        app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/viewTitle"
         app:srcCompat="@drawable/ic_exchange_rate" />
@@ -60,6 +60,22 @@
         app:layout_constraintBottom_toBottomOf="@+id/viewTitle"
         app:layout_constraintEnd_toStartOf="@+id/tvUpdateTime"
         app:layout_constraintTop_toTopOf="@+id/viewTitle" />
+
+    <com.rakuten.assignment.custom.TouchTextView
+        android:id="@+id/tvRefresh"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/bg_warning"
+        android:includeFontPadding="false"
+        android:padding="3dp"
+        android:text="@string/refresh"
+        android:textColor="@color/colorRed"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/viewTitle"
+        app:layout_constraintEnd_toStartOf="@+id/clpbLoading"
+        app:layout_constraintTop_toTopOf="@+id/viewTitle"
+        tools:visibility="visible" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvContent"

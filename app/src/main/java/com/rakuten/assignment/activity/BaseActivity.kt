@@ -11,13 +11,12 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.exceptions.UndeliverableException
 import io.reactivex.plugins.RxJavaPlugins
 
-abstract class BaseActivity : AppCompatActivity() , BaseContract.View {
+abstract class BaseActivity : AppCompatActivity(), BaseContract.View {
     private val disposables: CompositeDisposable = CompositeDisposable()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         RxJavaPlugins.setErrorHandler {
-            if( it is UndeliverableException){
+            if (it is UndeliverableException) {
                 Log.i("check", "UndeliverableException: " + it.message)
                 return@setErrorHandler
             }
@@ -42,6 +41,6 @@ abstract class BaseActivity : AppCompatActivity() , BaseContract.View {
     }
 
     override fun showError() {
-        Toast.makeText(baseContext , R.string.something_went_wrong , Toast.LENGTH_SHORT).show()
+        Toast.makeText(baseContext, R.string.something_went_wrong, Toast.LENGTH_SHORT).show()
     }
 }

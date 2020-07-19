@@ -5,4 +5,6 @@
     <string name="amount_hint">0.0</string>
     <string name="exchange_rate_label">1 %1$s = %2$s %3$s</string>
     <string name="update_time">update time : %s</string>
+    <string name="refresh">REFRESH</string>
+    <string name="no_network_connection">NO NETWORK CONNECTION</string>
 </resources>

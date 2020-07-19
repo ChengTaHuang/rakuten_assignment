@@ -1,6 +1,5 @@
 package com.rakuten.assignment.activity.main
 
-import android.util.Log
 import com.rakuten.assignment.rxjava.bind
 import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -18,8 +17,11 @@ class MainPresenterImpl(
         timerListener({
             view.showTimeLeft(it)
         } , {
-            Log.i("check", "call")
-            model.getExchangeRate()
+            model.isNetworkConnected()
+                .flatMap { isConnected ->
+                    if(isConnected) model.getExchangeRate()
+                    else throw NetworkConnectException()
+                }
                 .subscribeOn(Schedulers.io())
                 .flatMap {
                     model.convertToCountryExchangeRate(it)
@@ -29,10 +31,16 @@ class MainPresenterImpl(
                 .doOnSubscribe { view.showLoading() }
                 .doFinally { view.hideLoading() }
                 .subscribe({
+                    view.hideNetworkConnectionError()
                     view.showExchangeRates(it)
                     view.showUpdateTime(model.getCurrentTime())
                 }, {
-                    view.showError()
+                    if (it is NetworkConnectException) {
+                        stopGettingExchangeRates()
+                        view.showNetworkConnectionError()
+                    } else {
+                        view.showError()
+                    }
                 }).bind(view)
         })
     }
@@ -76,4 +84,6 @@ class MainPresenterImpl(
                 second(it.toInt() % 10)
             })
     }
+
+    class NetworkConnectException : Exception()
 }

@@ -1,5 +1,10 @@
 package com.rakuten.assignment.activity.main
 
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.os.Build
+import android.util.Log
 import com.rakuten.assignment.base.BaseModelImpl
 import com.rakuten.assignment.bean.CountryExchangeRate
 import com.rakuten.assignment.bean.ExchangeRatesResponse
@@ -12,8 +17,13 @@ import java.util.*
 class MainModelImpl(private val repo: MainRepository) : BaseModelImpl(),
     MainContract.Model {
     private var countryExchangeRates = mutableListOf<CountryExchangeRate>()
+
+    override fun isNetworkConnected(): Single<Boolean> {
+        return repo.isNetworkConnected()
+    }
+
     override fun getExchangeRate(): Single<ExchangeRatesResponse> {
-        return repo.getExchangeRate()
+        return  repo.getExchangeRate()
     }
 
     override fun convertToCountryExchangeRate(data: ExchangeRatesResponse): Single<List<CountryExchangeRate>> {
@@ -98,4 +108,25 @@ class MainModelImpl(private val repo: MainRepository) : BaseModelImpl(),
         return BigDecimal(countryRate)
             .divide(BigDecimal(EURRate.toString()), 4, RoundingMode.HALF_UP)
     }
+
+    val Context.isConnected: Boolean
+        get() {
+            val connectivityManager = this.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            return when {
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.M -> {
+                    val nw = connectivityManager.activeNetwork ?: return false
+                    val actNw = connectivityManager.getNetworkCapabilities(nw) ?: return false
+                    when {
+                        actNw.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
+                        actNw.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
+                        else -> false
+                    }
+                }
+                else -> {
+                    // Use depreciated methods only on older devices
+                    val nwInfo = connectivityManager.activeNetworkInfo ?: return false
+                    nwInfo.isConnected
+                }
+            }
+        }
 }

@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.Intent.getIntent
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.rakuten.assignment.R
@@ -47,6 +48,16 @@ class MainActivity : BaseActivity(), MainContract.View {
 
     }
 
+    override fun showNetworkConnectionError() {
+        Toast.makeText(baseContext , getString(R.string.no_network_connection) , Toast.LENGTH_SHORT).show()
+        tvUpdateTime.text = ""
+        tvRefresh.visibility = View.VISIBLE
+    }
+
+    override fun hideNetworkConnectionError() {
+        tvRefresh.visibility = View.GONE
+    }
+
     override fun showLoading() {
         clpbLoading.visibility = View.VISIBLE
     }
@@ -61,6 +72,10 @@ class MainActivity : BaseActivity(), MainContract.View {
             adapter = exchangeRatesAdapter
             itemAnimator = null
         }
+        tvRefresh.setOnClickListener {
+            presenter.startGettingExchangeRates()
+        }
+
         setCallBackListener()
     }
 

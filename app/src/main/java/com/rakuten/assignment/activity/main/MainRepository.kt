@@ -7,6 +7,8 @@ import io.reactivex.Single
 interface MainRepository {
 
     fun getExchangeRate(): Single<ExchangeRatesResponse>
+
+    fun isNetworkConnected() : Single<Boolean>
 }
 
 class MainRepositoryImpl(private val service: NetworkService) :
@@ -14,5 +16,9 @@ class MainRepositoryImpl(private val service: NetworkService) :
 
     override fun getExchangeRate(): Single<ExchangeRatesResponse> {
         return service.api.getExchangeRates()
+    }
+
+    override fun isNetworkConnected(): Single<Boolean> {
+        return Single.just(service.isConnected())
     }
 }

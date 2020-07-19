@@ -16,6 +16,8 @@ class MainContract {
         fun setAmount(amount: String) : Single<List<CountryExchangeRate>>
 
         fun changeBaseCountry(iso : String) : Single<List<CountryExchangeRate>>
+
+        fun isNetworkConnected() : Single<Boolean>
     }
 
     interface View : BaseContract.View {
@@ -24,6 +26,10 @@ class MainContract {
         fun showUpdateTime(date : String)
 
         fun showTimeLeft(second : Int)
+
+        fun showNetworkConnectionError()
+
+        fun hideNetworkConnectionError()
     }
 
     interface Presenter {
