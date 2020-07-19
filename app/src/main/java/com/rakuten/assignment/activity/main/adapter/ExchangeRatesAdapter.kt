@@ -4,9 +4,11 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import androidx.appcompat.widget.AppCompatImageView
@@ -161,7 +163,7 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
                 editAmount.setAllowInput(!data.isAmountFitEditText)
                 editAmount.setText(data.input)
                 editAmount.setSelection(editAmount.text.toString().length)
-                val textWatcher = object : TextWatcher {
+                editAmount.addTextChangedListener(object : TextWatcher {
                     override fun afterTextChanged(text: Editable?) {
                         text?.let {
                             val cleanAmount = text.toString().replace("[,.]".toRegex(), "")
@@ -177,10 +179,18 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
 
                     override fun onTextChanged(text: CharSequence?, p1: Int, p2: Int, p3: Int) {
                     }
-                }
-
-                editAmount.addTextChangedListener(textWatcher)
-                editAmount.tag = textWatcher
+                })
+                editAmount.setOnKeyListener(object : View.OnKeyListener {
+                    override fun onKey(v: View, keyCode: Int, event: KeyEvent): Boolean {
+                        if (event.action == KeyEvent.ACTION_DOWN && data.isAmountFitEditText) {
+                            if (keyCode >= KeyEvent.KEYCODE_0 && keyCode <= KeyEvent.KEYCODE_9) {
+                                editAmount.startAnimation(AnimationUtils.loadAnimation(v.context, R.anim.shake))
+                                return true
+                            }
+                        }
+                        return false
+                    }
+                })
                 onIsFitAmountEditTextListener.invoke(editAmount.howManyNumberCanItPut())
                 clBackground.setOnClickListener {
                     setEditAble(editAmount)
