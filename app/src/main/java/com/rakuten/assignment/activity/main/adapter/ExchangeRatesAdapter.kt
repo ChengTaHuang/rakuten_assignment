@@ -20,7 +20,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.mynameismidori.currencypicker.ExtendedCurrency
 import com.rakuten.assignment.R
 import com.rakuten.assignment.bean.CountryExchangeRate
-import com.rakuten.assignment.custom.AutoFormatEditText
+import com.rakuten.assignment.custom.AutoFormatEditText2
+import com.rakuten.assignment.custom.MoneyFormatEditText
 import com.rakuten.assignment.utils.howManyNumberCanItPut
 import com.rakuten.assignment.utils.removeAmountLastZero
 
@@ -124,7 +125,7 @@ class ExchangeRatesAdapter(private val recyclerView: RecyclerView) :
         protected val imgFlag by lazy { itemView.findViewById<AppCompatImageView>(R.id.imgFlag) }
         protected val tvRate by lazy { itemView.findViewById<AppCompatTextView>(R.id.tvRate) }
         protected val tvCountryName by lazy { itemView.findViewById<AppCompatTextView>(R.id.tvCountryName) }
-        protected val editAmount by lazy { itemView.findViewById<AutoFormatEditText>(R.id.editAmount) }
+        protected val editAmount by lazy { itemView.findViewById<MoneyFormatEditText>(R.id.editAmount) }
         protected val clBackground by lazy { itemView.findViewById<ConstraintLayout>(R.id.clBackground) }
         protected val keyboardManager: InputMethodManager by lazy {
             itemView.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager

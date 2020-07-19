@@ -46,7 +46,7 @@
             app:layout_constraintTop_toTopOf="parent"
             tools:text="TWD" />
 
-        <com.rakuten.assignment.custom.AutoFormatEditText
+        <com.rakuten.assignment.custom.MoneyFormatEditText
             android:id="@+id/editAmount"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
