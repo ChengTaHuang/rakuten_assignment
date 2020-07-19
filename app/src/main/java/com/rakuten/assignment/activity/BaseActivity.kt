@@ -17,7 +17,6 @@ abstract class BaseActivity : AppCompatActivity(), BaseContract.View {
         super.onCreate(savedInstanceState)
         RxJavaPlugins.setErrorHandler {
             if (it is UndeliverableException) {
-                Log.i("check", "UndeliverableException: " + it.message)
                 return@setErrorHandler
             }
         }
