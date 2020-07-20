@@ -58,4 +58,7 @@ dependencies {
     implementation "org.koin:koin-androidx-viewmodel:$koinVersion"
     implementation "org.koin:koin-androidx-ext:$koinVersion"
 
+    //unit test
+    testImplementation 'com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0'
+    testImplementation "org.koin:koin-test:$koinVersion"
 }
