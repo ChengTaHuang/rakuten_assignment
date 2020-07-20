@@ -3,11 +3,12 @@ package com.rakuten.assignment.koin
 import com.rakuten.assignment.activity.main.*
 import com.rakuten.assignment.activity.splash.*
 import com.rakuten.assignment.service.NetworkService
+import com.rakuten.assignment.service.NetworkServiceImpl
 import org.koin.dsl.module
 
 val appModule = module {
-    single {
-        NetworkService(get())
+    single<NetworkService> {
+        NetworkServiceImpl(get())
     }
     single<MainRepository> {
         MainRepositoryImpl(get())

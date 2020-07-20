@@ -14,8 +14,17 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
-class NetworkService(application: Application) {
+interface NetworkService {
+
     val api: API
+
+    fun isConnected(): Boolean
+
+}
+
+class NetworkServiceImpl(application: Application) : NetworkService {
+
+    override val api: API
     private val connectivityManager: ConnectivityManager
 
     init {
@@ -24,7 +33,7 @@ class NetworkService(application: Application) {
 
     }
 
-    fun isConnected(): Boolean {
+    override fun isConnected(): Boolean {
         return when {
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.M -> {
                 val nw = connectivityManager.activeNetwork ?: return false

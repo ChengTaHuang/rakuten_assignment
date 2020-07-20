@@ -27,6 +27,6 @@ class MainRepositoryImpl(private val service: NetworkService) :
     }
 
     override fun getTenSecondTimer(): Flowable<Long> {
-        return Flowable.interval(0, 10, TimeUnit.SECONDS)
+        return Flowable.interval(0, 10, TimeUnit.SECONDS).onBackpressureDrop()
     }
 }

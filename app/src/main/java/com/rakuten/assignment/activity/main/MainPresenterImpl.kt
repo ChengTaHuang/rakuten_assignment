@@ -70,7 +70,6 @@ class MainPresenterImpl(
     private fun timerListener(callBack: () -> Unit) {
         timerDisposable.clear()
         timerDisposable.add(model.getTenSecondTimer()
-            .onBackpressureDrop()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe {
