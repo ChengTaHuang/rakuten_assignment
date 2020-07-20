@@ -4,6 +4,8 @@ import com.rakuten.assignment.rxjava.bind
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import retrofit2.HttpException
+import java.net.SocketTimeoutException
 
 class MainPresenterImpl(
     private val model: MainContract.Model,
@@ -31,9 +33,11 @@ class MainPresenterImpl(
                     view.showExchangeRates(it)
                     view.showUpdateTime(model.getCurrentTime())
                 }, {
-                    if (it is NetworkConnectException) {
-                        stopGettingExchangeRates()
-                        view.showNetworkConnectionError()
+                    if (it is NetworkConnectException ||
+                        it is SocketTimeoutException ||
+                        it is HttpException) {
+                            stopGettingExchangeRates()
+                            view.showNetworkConnectionError()
                     } else {
                         view.showError()
                     }
